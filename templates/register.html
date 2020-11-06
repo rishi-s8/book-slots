@@ -2,7 +2,7 @@
 
 {% block body %}
 <style>
-  input[type="text"], input[type="password"]{
+  .form-control {
     width: 50%;
     margin:auto;
     box-sizing: border-box;
@@ -18,13 +18,9 @@
       <div class = "form-group">
         {{render_field(form.username, class_="form-control")}}
       </div>
-      Choose Account Type:
-      <SELECT name="accountType">
-        {% for c in typeList %}
-          <OPTION value={{c.type}} >{{c.type}}</option>
-        {% endfor %}
-        </SELECT>
-        <br><br>
+      <div class = "form-group">
+        {{render_field(form.accountType, class_="form-control")}}
+      </div>
       <div class = "form-group">
         {{render_field(form.password, class_="form-control")}}
       </div>

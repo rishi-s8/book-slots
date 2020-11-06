@@ -1,6 +1,6 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, DateField
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, DateField, SelectField
 from passlib.context import CryptContext
 from functools import wraps
 cryptcontext = CryptContext(schemes=["sha256_crypt", "md5_crypt", "des_crypt"])
@@ -42,26 +42,28 @@ def user(username):
 
 
 class RegisterForm(Form):
+    typeList = [('Institute', 'Institute'), ('Academic', 'Academic'), ('Other','Other')]
     name = StringField('Name', [validators.Length(min=1, max=50), validators.DataRequired()])
-    username = StringField('e-mail ID', [validators.Length(min=1, max=50), validators.DataRequired()])
+    username = StringField('E-mail ID', [validators.Length(min=1, max=50), validators.DataRequired()])
     password = PasswordField('Password', [validators.Length(min=6, max=50), validators.DataRequired(), validators.EqualTo('confirm', message='Passwords Do not match')])
     confirm = PasswordField('Confirm Password', [validators.DataRequired()])
-    type = StringField('Account Type', [validators.DataRequired()])
+    accountType = SelectField('Account Type', choices=typeList)
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm(request.form)
-    typeList = [{'type': 'Institute'}, {'type': 'Academic'}, {'type': 'Other'}]
     if request.method == 'POST' and form.validate():
         name = form.name.data
         username = form.username.data
         password = cryptcontext.hash(str(form.password.data))
-        type = form.type.data
+        accountType = form.accountType.data
+
+        print(name, username, password, accountType)
 
         #Create Cursor
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO users(name, username, password, accountType) Values(%s, %s, %s)", (name, username, password, type))
+        cur.execute("INSERT INTO users(name, username, password, accountType) Values(%s, %s, %s, %s)", (name, username, password, accountType))
         mysql.connection.commit()
 
         #Close Connection
@@ -70,7 +72,7 @@ def register():
         flash("Registered Successfully", "success")
         return redirect(url_for('index'))
 
-    return render_template('register.html', form=form, typeList=typeList)
+    return render_template('register.html', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
