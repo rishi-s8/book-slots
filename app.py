@@ -1,6 +1,6 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, DateField
 from passlib.context import CryptContext
 from functools import wraps
 cryptcontext = CryptContext(schemes=["sha256_crypt", "md5_crypt", "des_crypt"])
@@ -43,22 +43,25 @@ def user(username):
 
 class RegisterForm(Form):
     name = StringField('Name', [validators.Length(min=1, max=50), validators.DataRequired()])
-    username = StringField('Username', [validators.Length(min=1, max=11), validators.DataRequired()])
+    username = StringField('e-mail ID', [validators.Length(min=1, max=50), validators.DataRequired()])
     password = PasswordField('Password', [validators.Length(min=6, max=50), validators.DataRequired(), validators.EqualTo('confirm', message='Passwords Do not match')])
     confirm = PasswordField('Confirm Password', [validators.DataRequired()])
+    type = StringField('Account Type', [validators.DataRequired()])
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm(request.form)
+    typeList = [{'type': 'Institute'}, {'type': 'Academic'}, {'type': 'Other'}]
     if request.method == 'POST' and form.validate():
         name = form.name.data
         username = form.username.data
         password = cryptcontext.hash(str(form.password.data))
+        type = form.type.data
 
         #Create Cursor
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO users(name, username, password) Values(%s, %s, %s)", (name, username, password))
+        cur.execute("INSERT INTO users(name, username, password, accountType) Values(%s, %s, %s)", (name, username, password, type))
         mysql.connection.commit()
 
         #Close Connection
@@ -67,7 +70,7 @@ def register():
         flash("Registered Successfully", "success")
         return redirect(url_for('index'))
 
-    return render_template('register.html', form=form)
+    return render_template('register.html', form=form, typeList=typeList)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -116,14 +119,18 @@ def dashboard():
     cur.close()
 
 class BookingForm(Form):
-    title = StringField('Title', [validators.Length(min=1, max=255), validators.DataRequired()])
-    body = StringField('Body', [validators.Length(min=1), validators.DataRequired()])
+    SuperviserName = StringField('Superviser Name', [validators.Length(min=1, max=255), validators.DataRequired()])
+    SuperviserEmail = StringField('Superviser Email', [validators.Length(min=1), validators.DataRequired()])
+    date = DateField(id='datepick')
 
 @app.route('/book_slot', methods=['GET', 'POST'])
 @is_logged_in
 def add_booking():
     form = BookingForm(request.form)
-    return render_template('book_slot.html', form=form)
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT Name FROM Equipments")
+    Equipments = cur.fetchall()
+    return render_template('book_slot.html', form=form, Equipments = Equipments)
 
 if __name__ == '__main__':
     app.secret_key = "8Wy@d3E&wTin"

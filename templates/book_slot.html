@@ -5,11 +5,18 @@
     <h1>Book Slot</h1>
     {% from "includes/_formhelpers.html" import render_field %}
     <form method = 'POST' action="">
+      Choose a Facility
+      <SELECT name="Equipment">
+        {% for c in Equipments %}
+          <OPTION value={{c.Name}}>{{c.Name}}</option>
+        {% endfor %}
+        </SELECT>
+        <br><br>
+        <div class = "form-group">
+          {{render_field(form.SuperviserName, class_="form-control", id='editor')}}
+        </div>  
       <div class = "form-group">
-        {{render_field(form.title, class_="form-control")}}
-      </div>
-      <div class = "form-group">
-        {{render_field(form.body, class_="form-control", id='editor')}}
+        {{render_field(form.SuperviserEmail, class_="form-control", id='editor')}}
       </div>
       <p>
         <input type = 'submit' class = "btn btn-primary" value = "Submit">
