@@ -29,7 +29,11 @@ def is_logged_in(f):
 
 @app.route('/')
 def index():
-    return render_template('home.html')
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM Equipments")
+    users = cur.fetchall()
+    cur.close()
+    return render_template('home.html', Equipments = users)
 
 @app.route('/user/<string:username>')
 @is_logged_in

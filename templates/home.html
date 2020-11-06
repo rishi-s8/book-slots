@@ -2,7 +2,26 @@
 
 {% block body %}
 <div class="jumbotron text-center">
-    <h1>Bootstrap starter template</h1>
-    <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
+    <h1>Facilities/Equipment at C4DFED @ IIT Mandi</h1>
+    <p class="lead">Register & login to avail the services.</p>
   </div>
+  <hr>
+  <table class = 'table table-striped'>
+    <tr>
+      <th>ID</th>
+      <th>EQUIPMENT NAME</th>
+      <th>COMPANY</th>
+      <th>MODEL</th>
+      <th>PURPOSE</th>
+    </tr>
+    {% for Eq in Equipments %}
+    <tr>
+      <td>{{Eq.id}}</td>
+      <td>{{Eq.Name}}</td>
+      <td>{{Eq.Company}}</td>
+      <td>{{Eq.Model}}</td>
+      <td>{{Eq.Purpose}}</td>
+    </tr>
+    {% endfor %}
+  </table>
 {% endblock %}
