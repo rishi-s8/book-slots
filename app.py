@@ -1,3 +1,4 @@
+from itertools import chain
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, DateField, SelectField
@@ -63,13 +64,20 @@ def register():
 
         #Create Cursor
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO users(name, username, password, accountType) Values(%s, %s, %s, %s)", (name, username, password, accountType))
-        mysql.connection.commit()
+        result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
+        
+        if(result == 0):
+            cur.execute("INSERT INTO users(name, username, password, accountType) Values(%s, %s, %s, %s)", (name, username, password, accountType))
+            mysql.connection.commit()
+            flash("Registered Successfully", "success")
+
+        else:
+            error = 'An account already exists with this email address.'
+            return render_template('register.html', error= error, form=form)
 
         #Close Connection
         cur.close()
 
-        flash("Registered Successfully", "success")
         return redirect(url_for('index'))
 
     return render_template('register.html', form=form)
@@ -123,7 +131,8 @@ def dashboard():
 class BookingForm(Form):
     SuperviserName = StringField('Superviser Name', [validators.Length(min=1, max=255), validators.DataRequired()])
     SuperviserEmail = StringField('Superviser Email', [validators.Length(min=1), validators.DataRequired()])
-    date = DateField(id='datepick')
+    EqField = SelectField('Choose the Facility: ')
+    Dates = DateField("Date", format='%Y-%m-%d')
 
 @app.route('/book_slot', methods=['GET', 'POST'])
 @is_logged_in
@@ -132,7 +141,17 @@ def add_booking():
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT Name FROM Equipments")
     Equipments = cur.fetchall()
-    return render_template('book_slot.html', form=form, Equipments = Equipments)
+    EquipmentsList = []
+    for i in Equipments:
+        for value in i.items():
+            EquipmentsList.append(value)
+    form.EqField.choices = EquipmentsList
+
+    SuperviserName = form.SuperviserName.data
+    SuperViserEMail = form.SuperviserEmail.data
+    chosenEq = form.EqField.data
+
+    return render_template('book_slot.html', form=form)
 
 if __name__ == '__main__':
     app.secret_key = "8Wy@d3E&wTin"
