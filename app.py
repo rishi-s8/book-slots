@@ -133,8 +133,8 @@ def dashboard():
     cur.close()
 
 class BookingForm(Form):
-    SupervisorName = StringField('Superviser Name', [validators.Length(min=1, max=255), validators.DataRequired()])
-    SupervisorEmail = StringField('Superviser Email', [validators.Length(min=1), validators.DataRequired()])
+    SupervisorName = StringField('Supervisor Name', [validators.Length(min=1, max=255), validators.DataRequired()])
+    SupervisorEmail = StringField('Supervisor Email', [validators.Length(min=1), validators.DataRequired()])
     From = DateTimeLocalField("From: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
     To = DateTimeLocalField("To: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
 
