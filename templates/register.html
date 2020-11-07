@@ -2,9 +2,8 @@
 
 {% block body %}
 <style>
-  input[type="text"], input[type="password"]{
+  .form-control {
     width: 50%;
-    padding: 12px 20px;
     margin:auto;
     box-sizing: border-box;
   }
@@ -18,6 +17,9 @@
       </div>
       <div class = "form-group">
         {{render_field(form.username, class_="form-control")}}
+      </div>
+      <div class = "form-group">
+        {{render_field(form.accountType, class_="form-control")}}
       </div>
       <div class = "form-group">
         {{render_field(form.password, class_="form-control")}}

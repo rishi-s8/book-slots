@@ -1,27 +1,20 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="jumbotron text-center">
-    <h1>Facilities/Equipment at C4DFED @ IIT Mandi</h1>
-    <p class="lead">Register & login to avail the services.</p>
-  </div>
+  <h1> HOME <small> Welcome {{session.username}} </small> </h1>
+  <!-- <a class='btn btn-success' href = '/book_slot'> Book Slot </a> -->
   <hr>
   <table class = 'table table-striped'>
     <tr>
-      <th>ID</th>
-      <th>EQUIPMENT NAME</th>
-      <th>COMPANY</th>
-      <th>MODEL</th>
-      <th>PURPOSE</th>
+      <th>NAME</th>
+      <th>USERNAME</th>
     </tr>
-    {% for Eq in Equipments %}
+    {% for user in users %}
     <tr>
-      <td>{{Eq.id}}</td>
-      <td>{{Eq.Name}}</td>
-      <td>{{Eq.Company}}</td>
-      <td>{{Eq.Model}}</td>
-      <td>{{Eq.Purpose}}</td>
+      <td>{{user.name}}</td>
+      <td>{{user.username}}</td>
     </tr>
     {% endfor %}
   </table>
+
 {% endblock %}

@@ -16,6 +16,34 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `Bookings`
+--
+
+DROP TABLE IF EXISTS `Bookings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `Bookings` (
+  `UserId` int NOT NULL,
+  `EquipID` int NOT NULL,
+  `fromDateTime` varchar(240) NOT NULL,
+  `toDateTime` varchar(240) NOT NULL,
+  `RequestStatus` enum('Awaited','Accepted','Rejected') NOT NULL,
+  `SName` varchar(120) NOT NULL,
+  `SEmail` varchar(500) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Bookings`
+--
+
+LOCK TABLES `Bookings` WRITE;
+/*!40000 ALTER TABLE `Bookings` DISABLE KEYS */;
+INSERT INTO `Bookings` VALUES (6,1,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','des','d.com'),(6,1,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','des','d.com'),(6,1,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','des','d.com'),(1,7,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','superviser','email');
+/*!40000 ALTER TABLE `Bookings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `Equipments`
 --
 
@@ -50,10 +78,14 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
-  `name` varchar(255) DEFAULT NULL,
-  `username` varchar(255) DEFAULT NULL,
-  `password` varchar(1024) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `UserId` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(120) NOT NULL,
+  `username` varchar(500) NOT NULL,
+  `accountType` varchar(500) NOT NULL,
+  `password` varchar(500) NOT NULL,
+  PRIMARY KEY (`UserId`),
+  UNIQUE KEY `unique_email` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,7 +94,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES ('rishi','Rs123','$5$rounds=535000$.2O4J326BLcPYTSB$TpHyozRg0Q1SIvm/hz/18BaPBBbAu56Pzac4lPP.Ah0'),('Manvi Gupta','Manvi_Gupta','$5$rounds=535000$lVy1y5c5uprq5mpy$bazU2/tWh5kBjNKOxI4ZTQdVPALW8x1gb5NShKvi0T6');
+INSERT INTO `users` VALUES (1,'Manvi','Manvi_Gupta','Institute','$5$rounds=535000$TFFaIWG/CpVBkyi0$DFlja.gyWbvraJJ22O81qKsD2dS1E1CkYoeAfVqxSt/'),(3,'Manvi','b17092@students.iitmandi.ac.in','Institute','$5$rounds=535000$HORNwAiYtguwwuO5$2.dvYd/1KkAi/1G6nzGtlkZ8/.rhRdGXPSJ.slZaUB1'),(5,'TestUser','mail','Other','$5$rounds=535000$W/eICHAB4kIRTesu$z0jut0uRw2GoluxSeNpf4bLyTPGQeGos262Xb.wutB8'),(6,'BookUser','user@email.com','Academic','$5$rounds=535000$IqbGJ59bdD/lHoqm$/1c7HnR6AO17j5mLgi5V1YUt.qghH4M1SbyX3pvuPY4');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -75,4 +107,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-11-06 15:03:25
+-- Dump completed on 2020-11-07 20:56:10

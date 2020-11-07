@@ -1,20 +1,28 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-  <h1> Dashboard <small> Welcome {{session.username}} </small> </h1>
-  <a class='btn btn-success' href = '/book_slot'> Book Slot </a>
-  <hr>
-  <table class = 'table table-striped'>
-    <tr>
-      <th>NAME</th>
-      <th>USERNAME</th>
-    </tr>
-    {% for user in users %}
-    <tr>
-      <td>{{user.name}}</td>
-      <td>{{user.username}}</td>
-    </tr>
-    {% endfor %}
-  </table>
-
+<div class="jumbotron text-center">
+  <h1>Facilities/Equipment at C4DFED @ IIT Mandi</h1>
+  <p class="lead">Click on the required Equipment/Services to go to booking page.</p>
+</div>
+<hr>
+<table class = 'table table-striped'>
+  <tr>
+    <th>ID</th>
+    <th>EQUIPMENT NAME</th>
+    <th>COMPANY</th>
+    <th>MODEL</th>
+    <th>PURPOSE</th>
+  </tr>
+  {% for Eq in Equipments %}
+  <tr>
+    <td>{{Eq.id}}</td>
+    <td><a href="/book_slot/{{Eq.id}}" >{{Eq.Name}}</a></td>
+    <td>{{Eq.Company}}</td>
+    <td>{{Eq.Model}}</td>
+    <td>{{Eq.Purpose}}</td>
+  </tr>
+  {% endfor %}
+</table>
 {% endblock %}
+
