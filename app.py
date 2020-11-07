@@ -4,6 +4,9 @@ from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, DateField, SelectField
 from passlib.context import CryptContext
 from functools import wraps
+from wtforms import form
+
+from wtforms.fields.core import DateTimeField, TimeField
 cryptcontext = CryptContext(schemes=["sha256_crypt", "md5_crypt", "des_crypt"])
 
 app = Flask(__name__)
@@ -30,7 +33,11 @@ def is_logged_in(f):
 
 @app.route('/')
 def index():
-    return render_template('home.html')
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM users")
+    users = cur.fetchall()
+    cur.close()
+    return render_template('home.html', users = users)
 
 @app.route('/user/<string:username>')
 @is_logged_in
@@ -119,39 +126,45 @@ def logout():
 @is_logged_in
 def dashboard():
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM users")
+    result = cur.execute("SELECT * FROM Equipments")
     users = cur.fetchall()
     if result > 0:
-        return render_template('dashboard.html', users = users)
-    else:
-        msg = "No Users Found"
-        return render_template('dashboard.html', msg = msg)
+        return render_template('dashboard.html', Equipments = users)
     cur.close()
 
 class BookingForm(Form):
     SuperviserName = StringField('Superviser Name', [validators.Length(min=1, max=255), validators.DataRequired()])
     SuperviserEmail = StringField('Superviser Email', [validators.Length(min=1), validators.DataRequired()])
-    EqField = SelectField('Choose the Facility: ')
-    Dates = DateField("Date", format='%Y-%m-%d')
+    From = DateTimeField("From: ", [validators.DataRequired()])
+    To = DateTimeField("To: ", [validators.DataRequired()])
 
-@app.route('/book_slot', methods=['GET', 'POST'])
+@app.route('/book_slot/<int:EquipID>', methods=['GET', 'POST'])
 @is_logged_in
-def add_booking():
+def book_slot(EquipID):
     form = BookingForm(request.form)
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT Name FROM Equipments")
-    Equipments = cur.fetchall()
-    EquipmentsList = []
-    for i in Equipments:
-        for value in i.items():
-            EquipmentsList.append(value)
-    form.EqField.choices = EquipmentsList
-
+    result = cur.execute("SELECT id FROM Equipments where id = %s", [EquipID])
+    EquipId = cur.fetchone()['id']
+    username = session['username']
+    result = cur.execute("SELECT UserId from users WHERE username = %s", [username])
+    userID = cur.fetchone()['UserId']
     SuperviserName = form.SuperviserName.data
     SuperViserEMail = form.SuperviserEmail.data
-    chosenEq = form.EqField.data
+    From = form.From.data
+    To = form.To.data
+    if request.method == 'POST':
+        cur.execute(
+            "INSERT INTO Bookings(SName, SEmail, fromDateTime, toDateTime, UserId, EquipID) Values(%s, %s, %s, %s, %s, %s)", 
+        (SuperviserName, SuperViserEMail, From, To, userID, EquipId))
+        mysql.connection.commit()
+        flash("Booking Request Sent.")
+        return redirect(url_for('dashboard'))
 
-    return render_template('book_slot.html', form=form)
+    result = cur.execute("SELECT Name FROM Equipments where id = %s", [EquipID])
+    EquipName = cur.fetchone()['Name']
+    cur.close()
+    
+    return render_template('book_slot.html', EquipName = EquipName, form=form)
 
 if __name__ == '__main__':
     app.secret_key = "8Wy@d3E&wTin"

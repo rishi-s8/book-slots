@@ -1,12 +1,24 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+<style>
+  input[type="text"], input[type="password"]{
+    width: 50%;
+    padding: 12px 20px;
+    margin:auto;
+    box-sizing: border-box;
+  }
+  </style>
 <div class="jumbotron text-center">
-    <h1>Book Slot</h1>
+    <h1>Book Slot </h1>
+    <h2>{{EquipName}}</h2>
     {% from "includes/_formhelpers.html" import render_field %}
     <form method = 'POST' action="">
       <div class = "form-group">
-        {{render_field(form.EqField, class_="form-control", id='editor')}}
+        {{render_field(form.From, class_="form-control", id='editor')}}
+      </div>  
+      <div class = "form-group">
+        {{render_field(form.To, class_="form-control", id='editor')}}
       </div>  
         <div class = "form-group">
           {{render_field(form.SuperviserName, class_="form-control", id='editor')}}
