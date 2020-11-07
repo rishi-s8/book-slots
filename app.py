@@ -1,12 +1,12 @@
 from itertools import chain
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, DateField, SelectField
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField
+from wtforms.fields.html5 import DateTimeLocalField
 from passlib.context import CryptContext
 from functools import wraps
 from wtforms import form
 
-from wtforms.fields.core import DateTimeField, TimeField
 cryptcontext = CryptContext(schemes=["sha256_crypt", "md5_crypt", "des_crypt"])
 
 app = Flask(__name__)
@@ -133,33 +133,36 @@ def dashboard():
     cur.close()
 
 class BookingForm(Form):
-    SuperviserName = StringField('Superviser Name', [validators.Length(min=1, max=255), validators.DataRequired()])
-    SuperviserEmail = StringField('Superviser Email', [validators.Length(min=1), validators.DataRequired()])
-    From = DateTimeField("From: ", [validators.DataRequired()])
-    To = DateTimeField("To: ", [validators.DataRequired()])
+    SupervisorName = StringField('Superviser Name', [validators.Length(min=1, max=255), validators.DataRequired()])
+    SupervisorEmail = StringField('Superviser Email', [validators.Length(min=1), validators.DataRequired()])
+    From = DateTimeLocalField("From: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
+    To = DateTimeLocalField("To: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
 
 @app.route('/book_slot/<int:EquipID>', methods=['GET', 'POST'])
 @is_logged_in
 def book_slot(EquipID):
     form = BookingForm(request.form)
-    cur = mysql.connection.cursor()
-    result = cur.execute("SELECT id FROM Equipments where id = %s", [EquipID])
-    EquipId = cur.fetchone()['id']
-    username = session['username']
-    result = cur.execute("SELECT UserId from users WHERE username = %s", [username])
-    userID = cur.fetchone()['UserId']
-    SuperviserName = form.SuperviserName.data
-    SuperViserEMail = form.SuperviserEmail.data
-    From = form.From.data
-    To = form.To.data
     if request.method == 'POST':
+        cur = mysql.connection.cursor()
+        From = form.From.data
+        To = form.To.data
+        username = session['username']
+        result = cur.execute("SELECT UserId from users WHERE username = %s", [username])
+        userID = cur.fetchone()['UserId']
+        SupervisorName = form.SupervisorName.data
+        SupervisorEMail = form.SupervisorEmail.data
+
+        # TODO : Sanitize that the slot isn't already booked or awaited
+
         cur.execute(
             "INSERT INTO Bookings(SName, SEmail, fromDateTime, toDateTime, UserId, EquipID) Values(%s, %s, %s, %s, %s, %s)", 
-        (SuperviserName, SuperViserEMail, From, To, userID, EquipId))
+        (SupervisorName, SupervisorEMail, From, To, userID, EquipID))
         mysql.connection.commit()
-        flash("Booking Request Sent.")
+        cur.close()
+        flash("Booking Request Sent.", "success")
         return redirect(url_for('dashboard'))
 
+    cur = mysql.connection.cursor()
     result = cur.execute("SELECT Name FROM Equipments where id = %s", [EquipID])
     EquipName = cur.fetchone()['Name']
     cur.close()
