@@ -46,11 +46,7 @@ def is_admin(f):
 
 @app.route('/')
 def index():
-    cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM users")
-    users = cur.fetchall()
-    cur.close()
-    return render_template('home.html', users = users)
+    return render_template('home.html')
 
 @app.route('/users')
 @is_admin
