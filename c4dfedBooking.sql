@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.22, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.21, for osx10.15 (x86_64)
 --
 -- Host: localhost    Database: c4dfedBooking
 -- ------------------------------------------------------
--- Server version	8.0.22-0ubuntu0.20.04.2
+-- Server version	8.0.21
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -39,7 +39,7 @@ CREATE TABLE `Bookings` (
 
 LOCK TABLES `Bookings` WRITE;
 /*!40000 ALTER TABLE `Bookings` DISABLE KEYS */;
-INSERT INTO `Bookings` VALUES (6,1,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','des','d.com'),(6,1,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','des','d.com'),(6,1,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','des','d.com'),(1,7,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','superviser','email');
+INSERT INTO `Bookings` VALUES (6,1,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','des','d.com'),(6,1,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','des','d.com'),(6,1,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','des','d.com'),(1,7,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','superviser','email'),(7,1,'2020-11-13 22:00:00','2020-11-13 23:03:00','Awaited','Rishi','b17138@students.iitmandi.ac.in');
 /*!40000 ALTER TABLE `Bookings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -85,7 +85,7 @@ CREATE TABLE `users` (
   `password` varchar(500) NOT NULL,
   PRIMARY KEY (`UserId`),
   UNIQUE KEY `unique_email` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,9 +94,13 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Manvi','Manvi_Gupta','Institute','$5$rounds=535000$TFFaIWG/CpVBkyi0$DFlja.gyWbvraJJ22O81qKsD2dS1E1CkYoeAfVqxSt/'),(3,'Manvi','b17092@students.iitmandi.ac.in','Institute','$5$rounds=535000$HORNwAiYtguwwuO5$2.dvYd/1KkAi/1G6nzGtlkZ8/.rhRdGXPSJ.slZaUB1'),(5,'TestUser','mail','Other','$5$rounds=535000$W/eICHAB4kIRTesu$z0jut0uRw2GoluxSeNpf4bLyTPGQeGos262Xb.wutB8'),(6,'BookUser','user@email.com','Academic','$5$rounds=535000$IqbGJ59bdD/lHoqm$/1c7HnR6AO17j5mLgi5V1YUt.qghH4M1SbyX3pvuPY4');
+INSERT INTO `users` VALUES (1,'Manvi','Manvi_Gupta','Institute','$5$rounds=535000$TFFaIWG/CpVBkyi0$DFlja.gyWbvraJJ22O81qKsD2dS1E1CkYoeAfVqxSt/'),(3,'Manvi','b17092@students.iitmandi.ac.in','Institute','$5$rounds=535000$HORNwAiYtguwwuO5$2.dvYd/1KkAi/1G6nzGtlkZ8/.rhRdGXPSJ.slZaUB1'),(5,'TestUser','mail','Other','$5$rounds=535000$W/eICHAB4kIRTesu$z0jut0uRw2GoluxSeNpf4bLyTPGQeGos262Xb.wutB8'),(6,'BookUser','user@email.com','Academic','$5$rounds=535000$IqbGJ59bdD/lHoqm$/1c7HnR6AO17j5mLgi5V1YUt.qghH4M1SbyX3pvuPY4'),(7,'Rishi Sharma','b17138@students.iitmandi.ac.in','Institute','$5$rounds=535000$6wmXLHn6/0BN6kMp$jRioU7JX1BcAh9d2mdc6DLvlJhtB8ljzFGsgeVn39l4'),(8,'Administrator','admin@c4dfed.com','admin','$5$rounds=535000$nOgt8/gavSReSrFM$Xb9zZi5NEUIo8UFzydA6Vk492DT87olnDeRdOwOVks3');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping routines for database 'c4dfedBooking'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -107,4 +111,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-11-07 20:56:10
+-- Dump completed on 2020-11-08 12:32:18

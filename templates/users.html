@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1> Users </h1>
+  <hr>
+  <table class = 'table table-striped'>
+    <tr>
+      <th>NAME</th>
+      <th>USERNAME</th>
+      <th>ACCOUNT TYPE</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+      <td><a href="/user/{{user.UserId}}">{{user.name}}</a></td>
+      <td>{{user.username}}</td>
+      <td>{{user.accountType}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+{% endblock %}
