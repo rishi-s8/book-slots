@@ -21,6 +21,7 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MySQL
 mysql = MySQL(app)
 
+#Function to check user login status. Will throw error if unauthorized
 def is_logged_in(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -31,6 +32,7 @@ def is_logged_in(f):
             return redirect(url_for('login'))
     return wrap
 
+#Function to check whether user has Administrative privileges. Will redirect other users to Home page
 def is_admin(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -44,10 +46,12 @@ def is_admin(f):
             return redirect(url_for('index'))
     return wrap
 
+#Flask Route for Home Page
 @app.route('/')
 def index():
     return render_template('home.html')
 
+#Flask Route to view all users in Admin mode
 @app.route('/users')
 @is_admin
 def users():
@@ -60,6 +64,7 @@ def users():
     flash("No users found.", "danger")
     return render_template('home.html')
 
+#Flask Route to view particular user ID and their history in Admin mode
 @app.route('/user/<int:UserId>')
 @is_admin
 def user(UserId):
@@ -76,7 +81,7 @@ def user(UserId):
     cur.close()
     return render_template('user.html', history = history, user=cur_user)
 
-
+#Form to register for the C4DFED slot booking facility
 class RegisterForm(Form):
     typeList = [('Institute', 'Institute'), ('Academic', 'Academic'), ('Other','Other')]
     name = StringField('Name', [validators.Length(min=1, max=50), validators.DataRequired()])
@@ -85,7 +90,7 @@ class RegisterForm(Form):
     confirm = PasswordField('Confirm Password', [validators.DataRequired()])
     accountType = SelectField('Account Type', choices=typeList)
 
-
+#Flask Route to register a new user
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm(request.form)
@@ -103,7 +108,7 @@ def register():
             cur.execute("INSERT INTO users(name, username, password, accountType) Values(%s, %s, %s, %s)", (name, username, password, accountType))
             mysql.connection.commit()
             flash("Registered Successfully", "success")
-
+        #Raise error if email already used
         else:
             error = 'An account already exists with this email address.'
             return render_template('register.html', error= error, form=form)
@@ -115,7 +120,7 @@ def register():
 
     return render_template('register.html', form=form)
 
-
+#Flask Route to login to C4DFED slot booking facility
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -128,6 +133,7 @@ def login():
             data = cur.fetchone()
             password = data['password']
 
+            #Verify encrypted password
             if cryptcontext.verify(password_candidate, password):
                 session['logged_in'] = True
                 session['username'] = username
@@ -144,12 +150,14 @@ def login():
         cur.close()
     return render_template('login.html')
 
+#Flask route to logout of current session. Redirects to login page
 @app.route('/logout')
 def logout():
     session.clear()
     flash("You are now logged out", "success")
     return redirect(url_for('login'))
 
+#Flask route to view user dashboard with all available equipment for booking
 @app.route('/dashboard')
 @is_logged_in
 def dashboard():
@@ -162,13 +170,14 @@ def dashboard():
     flash("No Equipments available.", "danger")
     return render_template('home.html')
     
-
+#Form to record booking details of equipment with timings and supervisor details
 class BookingForm(Form):
     SupervisorName = StringField('Supervisor Name', [validators.Length(min=1, max=255), validators.DataRequired()])
     SupervisorEmail = StringField('Supervisor Email', [validators.Length(min=1), validators.DataRequired()])
     From = DateTimeLocalField("From: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
     To = DateTimeLocalField("To: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
 
+#Flask route to book slot of a particular equipment
 @app.route('/book_slot/<int:EquipID>', methods=['GET', 'POST'])
 @is_logged_in
 def book_slot(EquipID):
@@ -200,6 +209,7 @@ def book_slot(EquipID):
     
     return render_template('book_slot.html', EquipName = EquipName, form=form)
 
+#Server runs on 127.0.0.1:5000
 if __name__ == '__main__':
     app.secret_key = "8Wy@d3E&wTin"
     app.run(debug=True)
