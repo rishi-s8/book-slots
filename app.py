@@ -31,6 +31,19 @@ def is_logged_in(f):
             return redirect(url_for('login'))
     return wrap
 
+def is_admin(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session and 'admin' in session:
+            return f(*args, **kwargs)
+        elif not 'logged_in' in session:
+            flash('Unauthorized. Please login.', 'danger')
+            return redirect(url_for('login'))
+        else:
+            flash('Unauthorized. Only for administrator.', 'danger')
+            return redirect(url_for('index'))
+    return wrap
+
 @app.route('/')
 def index():
     cur = mysql.connection.cursor()
@@ -39,14 +52,33 @@ def index():
     cur.close()
     return render_template('home.html', users = users)
 
-@app.route('/user/<string:username>')
-@is_logged_in
-def user(username):
+@app.route('/users')
+@is_admin
+def users():
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM users where username = %s", [username])
-    user = cur.fetchone()
+    result = cur.execute("SELECT * FROM users")
+    users = cur.fetchall()
     cur.close()
-    return render_template('user.html', user = user)
+    if result > 0:
+        return render_template('users.html', users = users)
+    flash("No users found.", "danger")
+    return render_template('home.html')
+
+@app.route('/user/<int:UserId>')
+@is_admin
+def user(UserId):
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT username, name, accountType FROM users WHERE UserId = %s", [UserId])
+    cur_user = cur.fetchone()
+    result = cur.execute(
+        "SELECT e.Name as equipmentName,\
+            b.fromDateTime, b.toDateTime, b.RequestStatus,\
+            b.SName, b.SEmail from bookings b\
+            INNER JOIN Equipments e\
+            ON e.id = b.EquipID WHERE b.UserId = %s", [UserId])
+    history = cur.fetchall()
+    cur.close()
+    return render_template('user.html', history = history, user=cur_user)
 
 
 class RegisterForm(Form):
@@ -66,9 +98,7 @@ def register():
         username = form.username.data
         password = cryptcontext.hash(str(form.password.data))
         accountType = form.accountType.data
-
-        print(name, username, password, accountType)
-
+        
         #Create Cursor
         cur = mysql.connection.cursor()
         result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
@@ -105,6 +135,8 @@ def login():
             if cryptcontext.verify(password_candidate, password):
                 session['logged_in'] = True
                 session['username'] = username
+                if data['accountType'] == 'admin':
+                    session['admin'] = True
                 flash("You are now logged in", 'success')
                 return redirect(url_for('dashboard'))
             else:
@@ -128,9 +160,12 @@ def dashboard():
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM Equipments")
     users = cur.fetchall()
+    cur.close()
     if result > 0:
         return render_template('dashboard.html', Equipments = users)
-    cur.close()
+    flash("No Equipments available.", "danger")
+    return render_template('home.html')
+    
 
 class BookingForm(Form):
     SupervisorName = StringField('Supervisor Name', [validators.Length(min=1, max=255), validators.DataRequired()])

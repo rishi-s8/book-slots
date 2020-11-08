@@ -1,6 +1,29 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<h1>User Profile</h1>
-<small> {{user.name}} @ {{user.username}} </small>
+<h1> User History </h1>
+<p> Name : {{user.name}} </p> 
+<p> Email : {{user.username}} </p>
+<p> Account Type : {{user.accountType}} </p>
+  <hr>
+  <table class = 'table table-striped'>
+    <tr>
+      <th>EQUIPMENT NAME</th>
+      <th>FROM</th>
+      <th>TO</th>
+      <th>SUPERVISOR NAME</th>
+      <th>SUPERVISOR EMAIL</th>
+      <th>REQUEST STATUS</th>
+    </tr>
+    {% for booking in history %}
+    <tr>
+      <td>{{booking.equipmentName}}</td>
+      <td>{{booking.fromDateTime}}</td>
+      <td>{{booking.toDateTime}}</td>
+      <td>{{booking.SName}}</td>
+      <td>{{booking.SEmail}}</td>
+      <td>{{booking.RequestStatus}}</td>
+    </tr>
+    {% endfor %}
+  </table>
 {% endblock %}
