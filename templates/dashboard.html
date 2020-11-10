@@ -1,5 +1,7 @@
 {% extends 'layout.html' %}
 
+{% block title %} Dashboard {% endblock %}
+
 {% block body %}
 <div class="jumbotron text-center">
   <h1>Facilities/Equipment at C4DFED @ IIT Mandi</h1>
@@ -17,7 +19,7 @@
   {% for Eq in Equipments %}
   <tr>
     <td>{{Eq.id}}</td>
-    <td><a href="/book_slot/{{Eq.id}}" >{{Eq.Name}}</a></td>
+    <td><a href="/book_slot/{{Eq.id}}"><img src="{{url_for('static', filename = "eq"+Eq.id|string+".jpg")}}" height="100" width="20%"> {{Eq.Name}}</a></td>
     <td>{{Eq.Company}}</td>
     <td>{{Eq.Model}}</td>
     <td>{{Eq.Purpose}}</td>

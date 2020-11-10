@@ -1,5 +1,7 @@
 {% extends 'layout.html' %}
 
+{% block title %} {{EquipName}} {% endblock %}
+
 {% block body %}
 <style>
   .form-control {
@@ -12,6 +14,7 @@
 <div class="jumbotron text-center">
     <h1>Book Slot </h1>
     <h2>{{EquipName}}</h2>
+    <img src="{{url_for('static', filename = "eq"+EquipID|string+".jpg")}}" height="20%" width="20%">
     {% from "includes/_formhelpers.html" import render_field %}
     <form method = 'POST' action="">
       <div class = "form-group">
