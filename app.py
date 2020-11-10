@@ -14,7 +14,7 @@ app = Flask(__name__)
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = 'yashika'
 app.config['MYSQL_DB'] = 'c4dfedBooking'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -171,9 +171,10 @@ def dashboard():
     return render_template('home.html')
 
 #flask route to view user profile with user history
-@app.route('/profile/<string:username>')
+@app.route('/profile')
 @is_logged_in
-def profile(username):
+def profile():
+    username=session['username']
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT UserId, username, name, accountType FROM users WHERE username = %s", [username])
     cur_user = cur.fetchone()
