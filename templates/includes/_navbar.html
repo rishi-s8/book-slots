@@ -1,6 +1,7 @@
 <nav class="navbar navbar-expand-md navbar-dark bg-dark">
   <a class="navbar-brand" href="#"><img src="{{url_for('static', filename = 'logo.jpg')}}" height="50"></a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+    aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
 
@@ -15,19 +16,23 @@
     </ul>
     <ul class="nav navbar-nav navbar-right">
       {% if session.logged_in %}
-        <li class="nav-item">
-          <a class="nav-link" href="/dashboard"><i class="far fa-calendar-alt"></i> Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-        </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('profile',username=session.username)}}"><i class="fa fa-address-book"></i>
+          Profile</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/dashboard"><i class="far fa-calendar-alt"></i> Dashboard</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </li>
       {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/register"><i class="fas fa-user-plus"></i> Register</a>
-        </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Login</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/register"><i class="fas fa-user-plus"></i> Register</a>
+      </li>
       {% endif %}
     </ul>
   </div>

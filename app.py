@@ -169,7 +169,25 @@ def dashboard():
         return render_template('dashboard.html', Equipments = users)
     flash("No Equipments available.", "danger")
     return render_template('home.html')
-    
+
+#flask route to view user profile with user history
+@app.route('/profile/<string:username>')
+@is_logged_in
+def profile(username):
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT UserId, username, name, accountType FROM users WHERE username = %s", [username])
+    cur_user = cur.fetchone()
+    UserId = cur_user['UserId']
+    result = cur.execute(
+        "SELECT e.Name as equipmentName,\
+            b.fromDateTime, b.toDateTime, b.RequestStatus,\
+            b.SName, b.SEmail from Bookings b\
+            INNER JOIN Equipments e\
+            ON e.id = b.EquipID WHERE b.UserId = %s", [UserId])
+    history = cur.fetchall()
+    cur.close()
+    return render_template('profile.html', history = history, user=cur_user)
+
 #Form to record booking details of equipment with timings and supervisor details
 class BookingForm(Form):
     SupervisorName = StringField('Supervisor Name', [validators.Length(min=1, max=255), validators.DataRequired()])
