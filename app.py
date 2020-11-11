@@ -74,7 +74,7 @@ def user(UserId):
     result = cur.execute(
         "SELECT e.Name as equipmentName,\
             b.fromDateTime, b.toDateTime, b.RequestStatus,\
-            b.SName, b.SEmail from Bookings b\
+            b.SName, b.SEmail, b.EquipID from Bookings b\
             INNER JOIN Equipments e\
             ON e.id = b.EquipID WHERE b.UserId = %s", [UserId])
     history = cur.fetchall()
@@ -182,7 +182,7 @@ def profile():
     result = cur.execute(
         "SELECT e.Name as equipmentName,\
             b.fromDateTime, b.toDateTime, b.RequestStatus,\
-            b.SName, b.SEmail from Bookings b\
+            b.SName, b.SEmail, b.EquipID from Bookings b\
             INNER JOIN Equipments e\
             ON e.id = b.EquipID WHERE b.UserId = %s", [UserId])
     history = cur.fetchall()

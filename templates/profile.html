@@ -1,5 +1,7 @@
 {% extends 'layout.html' %}
 
+{% block title %} {{user.name}} {% endblock %}
+
 {% block body %}
 <h1> User Profile </h1>
 <p> Name : {{user.name}} </p> 
@@ -17,7 +19,7 @@
     </tr>
     {% for booking in history %}
     <tr>
-      <td>{{booking.equipmentName}}</td>
+      <td><img src="{{url_for('static', filename = "eq"+booking.EquipID|string+".jpg")}}" height="100" width="20%"> {{booking.equipmentName}}</td>
       <td>{{booking.fromDateTime}}</td>
       <td>{{booking.toDateTime}}</td>
       <td>{{booking.SName}}</td>
