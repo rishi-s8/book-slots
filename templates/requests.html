@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<h1>Update Request Status</h1>
+  <hr>
+  <table class = 'table table-striped'>
+    <tr>
+      <th>USER</th>
+      <th>EQUIPMENT NAME</th>
+      <th>FROM</th>
+      <th>TO</th>
+      <th>SUPERVISOR NAME</th>
+      <th>SUPERVISOR EMAIL</th>
+      <th>REQUEST STATUS</th>
+    </tr>
+    {% for req in requests %}
+    <tr>
+      <td>{{req.userName}}</td>
+      <td>{{req.equipmentName}}</td>
+      <td>{{req.fromDateTime}}</td>
+      <td>{{req.toDateTime}}</td>
+      <td>{{req.SName}}</td>
+      <td>{{req.SEmail}}</td>
+      <td><input type = 'submit' class = "btn btn-primary" value = "Update"></td>
+    </tr>
+    {% endfor %}
+  </table>
+{% endblock %}

@@ -64,6 +64,25 @@ def users():
     flash("No users found.", "danger")
     return render_template('home.html')
 
+@app.route('/requests')
+@is_admin
+def requests():
+    cur = mysql.connection.cursor()
+    result = cur.execute(
+        "SELECT e.Name as equipmentName,\
+            u.name as userName,\
+            b.UserId, b.fromDateTime, b.toDateTime,\
+            b.SName, b.SEmail from Bookings b\
+            INNER JOIN users u on u.UserId = b.UserId\
+            INNER JOIN Equipments e\
+            ON e.id = b.EquipID WHERE b.RequestStatus='Awaited'")
+    requests = cur.fetchall()
+    cur.close()
+    if result > 0:
+        return render_template('requests.html', requests = requests)
+    flash("No Pending Requests.", "danger")
+    return render_template('requests.html')
+
 #Flask Route to view particular user ID and their history in Admin mode
 @app.route('/user/<int:UserId>')
 @is_admin
