@@ -207,7 +207,7 @@ def book_slot(EquipID):
     EquipName = cur.fetchone()['Name']
     cur.close()
     
-    return render_template('book_slot.html', EquipName = EquipName, form=form)
+    return render_template('book_slot.html', EquipName = EquipName,EquipID = EquipID, form=form)
 
 #Server runs on 127.0.0.1:5000
 if __name__ == '__main__':
