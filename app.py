@@ -1,7 +1,7 @@
 from itertools import chain
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField
+from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField, HiddenField
 from wtforms.fields.html5 import DateTimeLocalField
 from passlib.context import CryptContext
 from functools import wraps
@@ -64,24 +64,40 @@ def users():
     flash("No users found.", "danger")
     return render_template('home.html')
 
-@app.route('/requests')
+#Flask form to Update Bookins Status
+class UpdateBooking(Form):
+    typeList = [('Awaited', 'Awaited'), ('Accepted', 'Accepted'),('Rescheduled', 'Rescheduled'),('Rejected', 'Rejected')]
+    status = SelectField('Status', choices=typeList)
+    bookingID = HiddenField('ID')
+
+#Flask Route to view and update slot booking requests
+@app.route('/requests', methods=['GET', 'POST'])
 @is_admin
 def requests():
+    form = UpdateBooking(request.form)
     cur = mysql.connection.cursor()
     result = cur.execute(
         "SELECT e.Name as equipmentName,\
             u.name as userName,\
             b.UserId, b.fromDateTime, b.toDateTime,\
-            b.SName, b.SEmail from Bookings b\
+            b.SName, b.SEmail, b.BookingID from Bookings b\
             INNER JOIN users u on u.UserId = b.UserId\
             INNER JOIN Equipments e\
             ON e.id = b.EquipID WHERE b.RequestStatus='Awaited'")
     requests = cur.fetchall()
     cur.close()
     if result > 0:
-        return render_template('requests.html', requests = requests)
+        if request.method == 'POST':
+            cur = mysql.connection.cursor()
+            Status = request.form['status']
+            BookingID = request.form['bookingID']
+            cur.execute("UPDATE Bookings SET RequestStatus= %s WHERE BookingID = %s", (Status,BookingID))
+            mysql.connection.commit()
+            cur.close()
+            flash("Status Updated.", "success")
+        return render_template('requests.html', requests = requests,form=form)
     flash("No Pending Requests.", "danger")
-    return render_template('requests.html')
+    return render_template('requests.html', form=form)
 
 #Flask Route to view particular user ID and their history in Admin mode
 @app.route('/user/<int:UserId>')

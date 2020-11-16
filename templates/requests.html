@@ -1,6 +1,17 @@
 {% extends 'layout.html' %}
 
+{% block title %} Requests {% endblock %}
+
 {% block body %}
+
+<style>
+  .form-control {
+    width: 100%;
+    margin: auto;
+    box-sizing: border-box;
+  }
+</style>
+
 <h1>Update Request Status</h1>
   <hr>
   <table class = 'table table-striped'>
@@ -21,7 +32,15 @@
       <td>{{req.toDateTime}}</td>
       <td>{{req.SName}}</td>
       <td>{{req.SEmail}}</td>
-      <td><input type = 'submit' class = "btn btn-primary" value = "Update"></td>
+      <td>
+        {% from "includes/_formhelpers.html" import render_field %}
+        <form method='POST' action="">
+          <div class="form-group">
+            {{render_field(form.status, class_="form-control")}}
+          </div>
+          {{ form.bookingID(value=req.BookingID) }}
+          <input type = 'submit' class = "btn btn-primary" value = "Update">
+        </td>
     </tr>
     {% endfor %}
   </table>
