@@ -64,7 +64,7 @@ def users():
     flash("No users found.", "danger")
     return render_template('home.html')
 
-#Flask form to Update Bookins Status
+#Flask form to Update Booking Status
 class UpdateBooking(Form):
     typeList = [('Awaited', 'Awaited'), ('Accepted', 'Accepted'),('Rescheduled', 'Rescheduled'),('Rejected', 'Rejected')]
     status = SelectField('Status', choices=typeList)
