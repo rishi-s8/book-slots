@@ -24,8 +24,10 @@ function build_calendar($month, $year){
   
   //Now creating the HTML table
   $calendar = "<table class='table table-bordered'>";
-  $calendar.="<center><h2>$monthName $year</h2></center>";
-  
+  $calendar.="<center><h2>$monthName $year</h2>";
+  $calendar.="<a class='btn btn-xs btn-primary' href='?month=".date('m',mktime(0,0,0,$month-1,1,$year))."&year=".date('Y',mktime(0,0,0,$month-1,1,$year)).">Previous Month</a>";
+  $calendar.="<a class='btn btn-xs btn-primary' href='?month=".date('m')."&year=".date('Y').">Current Month</a>";
+  $calendar.="<a class='btn btn-xs btn-primary' href='?month=".date('m',mktime(0,0,0,$month+1,1,$year))."&year=".date('Y',mktime(0,0,0,$month+1,1,$year)).">Next Month</a>";  
   $calendar.= "<tr>";
   
   //Creating the calendar headers
