@@ -245,12 +245,20 @@ def book_slot(EquipID):
     result = cur.execute("SELECT accountType from users WHERE username = %s", [username])
     ACCType = 'Cost'+cur.fetchone()['accountType']
     cur.close()
-    cur = mysql.connection.cursor()
-    result = cur.execute("SELECT Name, CostInstitute, CostAcademic, CostOther FROM Equipments where id = %s", [EquipID])
-    cur_Equi = cur.fetchone()
-    EquipName = cur_Equi['Name']
-    Cost=cur_Equi[ACCType]
-    cur.close()
+    if ACCType=='Costadmin':
+        Cost = '0'
+        cur = mysql.connection.cursor()
+        result = cur.execute("SELECT Name FROM Equipments where id = %s", [EquipID])
+        cur_Equi = cur.fetchone()
+        EquipName = cur_Equi['Name']
+        cur.close()
+    else:
+        cur = mysql.connection.cursor()
+        result = cur.execute("SELECT Name, CostInstitute, CostAcademic, CostOther FROM Equipments where id = %s", [EquipID])
+        cur_Equi = cur.fetchone()
+        EquipName = cur_Equi['Name']
+        Cost=cur_Equi[ACCType]
+        cur.close()
     
     return render_template('book_slot.html', EquipName = EquipName,EquipID = EquipID, form=form, Cost=Cost)
 
