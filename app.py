@@ -244,7 +244,7 @@ def book_slot(EquipID):
     username = session['username']
     result = cur.execute("SELECT accountType from users WHERE username = %s", [username])
     ACCType = 'Cost'+cur.fetchone()['accountType']
- 
+    cur.close()
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT Name, CostInstitute, CostAcademic, CostOther FROM Equipments where id = %s", [EquipID])
     cur_Equi = cur.fetchone()
