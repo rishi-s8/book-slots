@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+
+{% block title %} Update {% endblock %}
+
+{% block body %}
+<style>
+    .form-control {
+        width: 50%;
+        padding: 12px 20px;
+        margin: auto;
+        box-sizing: border-box;
+    }
+</style>
+<div class="jumbotron text-center">
+    <h1>Update Booking </h1>
+    <h2>Booking Number: {{BookingID}}</h2>
+    {% from "includes/_formhelpers.html" import render_field %}
+    <form method='POST' action="">
+        <div class="form-group">
+            {{render_field(form.status, class_="form-control")}}
+        </div>
+       
+        <div class="form-group">
+            {{render_field(form.From, class_="form-control", id='editor')}}
+        </div>
+        <div class="form-group">
+            {{render_field(form.To, class_="form-control", id='editor')}}
+        </div>
+        
+        {{ form.bookingID(value=BookingID) }}
+        <p>
+            <input type='submit' class="btn btn-primary" value="Submit">
+        </p>
+    </form>
+</div>
+{% endblock %}
