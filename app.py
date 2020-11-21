@@ -14,7 +14,7 @@ app = Flask(__name__)
 # Config MySQL
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = ''
+app.config['MYSQL_PASSWORD'] = 'Harrywand$24'
 app.config['MYSQL_DB'] = 'c4dfedBooking'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -64,17 +64,36 @@ def users():
     flash("No users found.", "danger")
     return render_template('home.html')
 
-#Flask form to Update Bookins Status
+#Flask form to Update Booking Status
 class UpdateBooking(Form):
     typeList = [('Awaited', 'Awaited'), ('Accepted', 'Accepted'),('Rescheduled', 'Rescheduled'),('Rejected', 'Rejected')]
     status = SelectField('Status', choices=typeList)
+    From = DateTimeLocalField("From: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
+    To = DateTimeLocalField("To: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
     bookingID = HiddenField('ID')
 
-#Flask Route to view and update slot booking requests
+#Flask Route to update slot booking requests
+@app.route('/update_booking/<int:BookingID>', methods=['GET', 'POST'])
+@is_admin
+def update_booking(BookingID):
+    form = UpdateBooking(request.form)
+    if request.method == 'POST':
+        cur = mysql.connection.cursor()
+        Status = request.form['status']
+        BookingID = request.form['bookingID']
+        From = request.form['From']
+        To = request.form['To']
+        cur.execute("UPDATE Bookings SET RequestStatus= %s, fromDateTime=%s, toDateTime=%s WHERE BookingID = %s", (Status,From,To, BookingID))
+        mysql.connection.commit()
+        cur.close()
+        flash("Status Updated.", "success")
+        return redirect(url_for('requests'))
+    return render_template('update_booking.html', BookingID=BookingID, form=form)
+
+#Flask Route to view slot booking requests
 @app.route('/requests', methods=['GET', 'POST'])
 @is_admin
 def requests():
-    form = UpdateBooking(request.form)
     cur = mysql.connection.cursor()
     result = cur.execute(
         "SELECT e.Name as equipmentName,\
@@ -87,14 +106,6 @@ def requests():
     requests = cur.fetchall()
     cur.close()
     if result > 0:
-        if request.method == 'POST':
-            cur = mysql.connection.cursor()
-            Status = request.form['status']
-            BookingID = request.form['bookingID']
-            cur.execute("UPDATE Bookings SET RequestStatus= %s WHERE BookingID = %s", (Status,BookingID))
-            mysql.connection.commit()
-            cur.close()
-            flash("Status Updated.", "success")
         return render_template('requests.html', requests = requests,form=form)
     flash("No Pending Requests.", "danger")
     return render_template('requests.html', form=form)
