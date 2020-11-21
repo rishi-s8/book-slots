@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.22, for Linux (x86_64)
 --
--- Host: localhost    Database: c4dfedBooking
+-- Host: localhost    Database: c4dfedBooking1
 -- ------------------------------------------------------
--- Server version	8.0.22-0ubuntu0.20.04.2
+-- Server version	8.0.22
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -58,8 +58,11 @@ CREATE TABLE `Equipments` (
   `Company` varchar(500) DEFAULT NULL,
   `Model` varchar(500) DEFAULT NULL,
   `Purpose` varchar(1000) DEFAULT NULL,
+  `CostOther` float DEFAULT NULL,
+  `CostInstitute` float DEFAULT NULL,
+  `CostAcademic` float DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -68,7 +71,7 @@ CREATE TABLE `Equipments` (
 
 LOCK TABLES `Equipments` WRITE;
 /*!40000 ALTER TABLE `Equipments` DISABLE KEYS */;
-INSERT INTO `Equipments` VALUES (1,'Helium IonBeam Lithography','Carl Zeiss Microscope','ORION Nano Fab','For fabricating new semiconductor devices'),(2,'Electron Beam Lithography','Raith','eLine Plus','To  pattern the substrate'),(3,'FESEM (Field Emission Scanning Electron Microscope)','Carl Zeiss Microscope','GeminiSEM 500','To provide Topographical and Elemental information at high magnifications'),(4,'Mask Aligner: Lithography',' EV group','EVG610','For mask dependent Lithography'),(5,'AFM (Atomic Force Microscopy)','Bruker','Dimension ICON PT',' To analyse the surface properties of thin films'),(6,'Ellipsometry','Accurion','EP4','For extraction of Dielectric properties'),(7,'Maskless Lithography','Intelligent Micro Patterning','SF - 100 Xpress Maskless Exposure','For patterning in device fabrication using CAD based Mask'),(8,'Reactive Ion Etching','PLANAR tech.','PlanarRIE-6s','For dry etching using reactive gas discharge'),(9,'Multi Chamber Sputtering System','Advanced Process Technology','Self Assembled','For solid-state thin film deposition for Device Fabrication'),(10,'Optical Profilometer','Bruker','CONTOURGT-K Automated System','To get surface morphology, step heights and surface roughness'),(11,'Thermal Evaporator','Hind High Vacuum','BC -300','For physical vapour deposition of the material'),(12,'Glove Box','SciLab - Vigro Gas Purification tech','SGI 200/750TS','For the synthesis of the device'),(13,'Contact Angle','SEO (Surface Electro Optics) Phoenix 300','SEO Phoenix 300','To verify whether the substrate is hydrophobic or hydrophilic'),(14,'Electrochemical Analyzer','CH instrument','(CHI604E)','For the measurement of potential, charge, or current'),(15,'Optical Microscope','Olympus','BX-51 TRF','For temperature dependent analysis'),(16,'Electrical Characterization System','Tektronics.','Keithley 4200 SCS','For electrical characterisation of the devices'),(17,'3D Printer','General Laboratory equipment','XYZ Printing PRO','Joins or solidifies polymer under computer control'),(18,'Stylus Profilometer','AEP Technology','Nano Map-LS','To get surface morphology'),(19,'Spin Coater','Laurell International','WS-650MZ-23NPP','For thin film deposition'),(20,'3 Zone Furnace','Thermo scientific','Lindberg Blue M','For the oxidation and annealing of the devices');
+INSERT INTO `Equipments` VALUES (1,'Helium IonBeam Lithography','Carl Zeiss Microscope','ORION Nano Fab','For fabricating new semiconductor devices',10000,2000,5000),(2,'Electron Beam Lithography(Exposure only)','Raith','eLine Plus','To  pattern the substrate',5000,1000,2500),(3,'FESEM (Field Emission Scanning Electron Microscope)','Carl Zeiss Microscope','GeminiSEM 500','To provide Topographical and Elemental information at high magnifications',3750,750,1875),(4,'Mask Aligner: Optical Lithography',' EV group','EVG610','For mask dependent Lithography',1250,250,625),(5,'AFM (Atomic Force Microscopy)','Bruker','Dimension ICON PT',' To analyse the surface properties of thin films',2500,500,1250),(6,'Ellipsometer(Modeling and Analysis)','Accurion','EP4','For extraction of Dielectric properties',12500,2500,6250),(7,'Maskless Lithography','Intelligent Micro Patterning','SF - 100 Xpress Maskless Exposure','For patterning in device fabrication using CAD based Mask',1000,200,500),(8,'Reactive Ion Etching','PLANAR tech.','PlanarRIE-6s','For dry etching using reactive gas discharge',1500,300,750),(9,'Multi Chamber Sputtering System','Advanced Process Technology','Self Assembled','For solid-state thin film deposition for Device Fabrication',2000,400,1000),(10,'Optical Profilometer','Bruker','CONTOURGT-K Automated System','To get surface morphology, step heights and surface roughness',750,150,375),(11,'Thermal Evaporator','Hind High Vacuum','BC -300','For physical vapour deposition of the material',1500,300,750),(12,'Glove Box','SciLab - Vigro Gas Purification tech','SGI 200/750TS','For the synthesis of the device',750,150,375),(13,'Contact Angle','SEO (Surface Electro Optics) Phoenix 300','SEO Phoenix 300','To verify whether the substrate is hydrophobic or hydrophilic',400,100,125),(14,'Electrochemical Analyzer','CH instrument','(CHI604E)','For the measurement of potential, charge, or current',500,100,250),(15,'Optical Microscope','Olympus','BX-51 TRF','For temperature dependent analysis',500,100,250),(16,'Electrical Characterization System','Tektronics.','Keithley 4200 SCS','For electrical characterisation of the devices',500,100,250),(17,'3D Printer','General Laboratory equipment','XYZ Printing PRO','Joins or solidifies polymer under computer control',500,100,250),(18,'Stylis Profiler','AEP Technology','Nano Map-LS','To get surface morphology',500,100,250),(19,'Spin Coater','Laurell International','WS-650MZ-23NPP','For thin film deposition',600,75,200),(20,'3 Zone Furnace','Thermo scientific','Lindberg Blue M','For the oxidation and annealing of the devices',500,100,250),(21,'Elipsometer(Data Acquisition)',NULL,'Accurion',NULL,2500,1250,500),(22,'Optical Lithography',NULL,'EV Group',NULL,1250,625,250),(23,'E-spin',NULL,'E-Spin nanotech',NULL,500,250,100),(24,'Spin Coater(In air)',NULL,'Spectro Spin',NULL,250,125,50),(25,'Vacuum Oven',NULL,'Nanosemi Technology',NULL,500,250,100),(26,'DI water',NULL,'Millipore',NULL,250,125,50),(27,'Clean Lab Space(5\'x5\')',NULL,'-',NULL,10000,5000,2000);
 /*!40000 ALTER TABLE `Equipments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -109,4 +112,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-11-10 23:15:22
+-- Dump completed on 2020-11-16 15:40:55
