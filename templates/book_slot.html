@@ -16,8 +16,8 @@
     <h2>{{EquipName}}</h2>
     <img src="{{url_for('static', filename = "eq"+EquipID|string+".jpg")}}" height="20%" width="20%">
     {% from "includes/_formhelpers.html" import render_field %}
-    <form method = 'POST' action="">
-      <h4>Cost: {{Cost}} ₹</h4>
+    <form method = 'POST' action=""><br>
+      <h4>Cost: ₹ {{Cost}}/- </h4>
       <div class = "form-group">
         {{render_field(form.From, class_="form-control", id='editor')}}
       </div>  
