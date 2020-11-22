@@ -239,13 +239,28 @@ def book_slot(EquipID):
         cur.close()
         flash("Booking Request Sent.", "success")
         return redirect(url_for('dashboard'))
-
+        
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT Name FROM Equipments where id = %s", [EquipID])
-    EquipName = cur.fetchone()['Name']
+    username = session['username']
+    result = cur.execute("SELECT accountType from users WHERE username = %s", [username])
+    ACCType = 'Cost'+cur.fetchone()['accountType']
     cur.close()
+    if ACCType=='Costadmin':
+        Cost = '0'
+        cur = mysql.connection.cursor()
+        result = cur.execute("SELECT Name FROM Equipments where id = %s", [EquipID])
+        cur_Equi = cur.fetchone()
+        EquipName = cur_Equi['Name']
+        cur.close()
+    else:
+        cur = mysql.connection.cursor()
+        result = cur.execute("SELECT Name, CostInstitute, CostAcademic, CostOther FROM Equipments where id = %s", [EquipID])
+        cur_Equi = cur.fetchone()
+        EquipName = cur_Equi['Name']
+        Cost=cur_Equi[ACCType]
+        cur.close()
     
-    return render_template('book_slot.html', EquipName = EquipName,EquipID = EquipID, form=form)
+    return render_template('book_slot.html', EquipName = EquipName,EquipID = EquipID, form=form, Cost=Cost)
 
 #Server runs on 127.0.0.1:5000
 if __name__ == '__main__':
