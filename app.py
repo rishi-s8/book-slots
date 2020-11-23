@@ -66,10 +66,8 @@ def users():
 
 #Flask form to Update Booking Status
 class UpdateBooking(Form):
-    typeList = [('Awaited', 'Awaited'), ('Accepted', 'Accepted'),('Rescheduled', 'Rescheduled'),('Rejected', 'Rejected')]
+    typeList = [('Awaited', 'Awaited'), ('Accepted', 'Accepted'),('Rejected', 'Rejected')]
     status = SelectField('Status', choices=typeList)
-    From = DateTimeLocalField("From: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
-    To = DateTimeLocalField("To: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
     bookingID = HiddenField('ID')
 
 #Flask Route to update slot booking requests
@@ -81,14 +79,35 @@ def update_booking(BookingID):
         cur = mysql.connection.cursor()
         Status = request.form['status']
         BookingID = request.form['bookingID']
-        From = request.form['From']
-        To = request.form['To']
-        cur.execute("UPDATE Bookings SET RequestStatus= %s, fromDateTime=%s, toDateTime=%s WHERE BookingID = %s", (Status,From,To, BookingID))
+        cur.execute("UPDATE Bookings SET RequestStatus= %s WHERE BookingID = %s", (Status, BookingID))
         mysql.connection.commit()
         cur.close()
         flash("Status Updated.", "success")
         return redirect(url_for('requests'))
     return render_template('update_booking.html', BookingID=BookingID, form=form)
+
+#Flask form to Reschedule Booking
+class RescheduleBooking(Form):
+    From = DateTimeLocalField("From: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
+    To = DateTimeLocalField("To: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
+    bookingID = HiddenField('ID')
+
+@app.route('/reschedule/<int:BookingID>', methods=['GET', 'POST'])
+@is_admin
+def reschedule(BookingID):
+    form = RescheduleBooking(request.form)
+    if request.method == 'POST':
+        cur = mysql.connection.cursor()
+        Status = 'Rescheduled'
+        BookingID = request.form['bookingID']
+        From = request.form['From']
+        To = request.form['To']
+        cur.execute("UPDATE Bookings SET RequestStatus= %s, fromDateTime=%s, toDateTime=%s WHERE BookingID = %s",(Status, From, To, BookingID))
+        mysql.connection.commit()
+        cur.close()
+        flash("Booking Rescheduled.", "success")
+        return redirect(url_for('requests'))
+    return render_template('reschedule.html', BookingID=BookingID, form=form)
 
 #Flask Route to view slot booking requests
 @app.route('/requests', methods=['GET', 'POST'])
