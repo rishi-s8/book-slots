@@ -92,6 +92,7 @@ class RescheduleBooking(Form):
     To = DateTimeLocalField("To: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
     bookingID = HiddenField('ID')
 
+#Flask Route to Reschedule Booking
 @app.route('/reschedule/<int:BookingID>', methods=['GET', 'POST'])
 @is_admin
 def reschedule(BookingID):
@@ -108,6 +109,27 @@ def reschedule(BookingID):
         flash("Booking Rescheduled.", "success")
         return redirect(url_for('requests'))
     return render_template('reschedule.html', BookingID=BookingID, form=form)
+
+
+#Flask form to Accept/Reject Rescheduled Booking
+class AccRejRescheduling(Form):
+    typeList = [('Accepted','Accept'), ('Rejected', 'Reject')]
+    status = SelectField('Status', choices=typeList)
+    bookingID = HiddenField('ID')
+
+#Flask Route to Accept/Reject Rescheduled Booking
+@app.route('/confirm_reschedule/<int:BookingID>', methods=['GET', 'POST'])
+def confirm_resched(BookingID):
+    form = AccRejRescheduling(request.form)
+    if request.method == 'POST':
+        cur = mysql.connection.cursor()
+        Status = request.form['status']
+        cur.execute("UPDATE Bookings SET RequestStatus= %s WHERE BookingID = %s",(Status, BookingID))
+        mysql.connection.commit()
+        cur.close()
+        flash("Accepted/Rejected Rescheduling.", "success")
+        return redirect(url_for('profile'))
+    return render_template('confirm_rescheduling.html', BookingID=BookingID, form=form)
 
 #Flask Route to view slot booking requests
 @app.route('/requests', methods=['GET', 'POST'])
@@ -247,7 +269,7 @@ def profile():
     result = cur.execute(
         "SELECT e.Name as equipmentName,\
             b.fromDateTime, b.toDateTime, b.RequestStatus,\
-            b.SName, b.SEmail from Bookings b\
+            b.SName, b.SEmail, b.BookingID from Bookings b\
             INNER JOIN Equipments e\
             ON e.id = b.EquipID WHERE b.UserId = %s", [UserId])
     history = cur.fetchall()

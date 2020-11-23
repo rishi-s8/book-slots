@@ -24,7 +24,12 @@
       <td>{{booking.toDateTime}}</td>
       <td>{{booking.SName}}</td>
       <td>{{booking.SEmail}}</td>
-      <td>{{booking.RequestStatus}}</td>
+      <td>
+        {{booking.RequestStatus}}
+        {% if booking.RequestStatus=='Rescheduled' %}
+          <a href="/confirm_reschedule/{{booking.BookingID}}"><input type='submit' class="btn btn-primary" value="Accept/Reject"></a>
+        {% endif %}
+      </td>
     </tr>
     {% endfor %}
   </table>
