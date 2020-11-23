@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+
+{% block title %} Update {% endblock %}
+
+{% block body %}
+<style>
+    .form-control {
+        width: 50%;
+        margin: auto;
+        box-sizing: border-box;
+    }
+</style>
+<div class="jumbotron text-center">
+    <h1>Update Booking </h1>
+    <h2>Booking Number: {{BookingID}}</h2>
+    {% from "includes/_formhelpers.html" import render_field %}
+    <form method='POST' action="">
+        <div class="form-group">
+            {{render_field(form.status, class_="form-control")}}
+        </div>
+        {{ form.bookingID(value=BookingID) }}
+        <p>
+            <input type='submit' class="btn btn-primary" value="Submit">
+        </p>
+    </form>
+    <p><a href="/reschedule/{{BookingID}}"><input type='submit' class="btn btn-primary" value="Reschedule"></a></p>
+</div>
+{% endblock %}
