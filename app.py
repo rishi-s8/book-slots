@@ -333,6 +333,10 @@ def book_slot(EquipID):
 @app.route('/calendar')
 @is_admin
 def calendar():
+    """
+    Render fullcalendar.
+    Courtesy https://github.com/kkarimi/flask-fullcalendar 
+    """
     return render_template("json.html")
 
 @app.route('/data')
