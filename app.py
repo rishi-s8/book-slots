@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from functools import wraps
 from wtforms import form
 
-cryptcontext = CryptContext(schemes=["sha256_crypt", "md5_crypt", "des_crypt"])
+cryptcontext = CryptContext(schemes=["sha256_crypt", "md5_crypt", "des_crypt"]) # Schemes for encrypting passwords
 
 app = Flask(__name__)
 
@@ -21,8 +21,12 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 # init MySQL
 mysql = MySQL(app)
 
-#Function to check user login status. Will throw error if unauthorized
 def is_logged_in(f):
+    """
+    is_logged_in(f):
+        Decorator to verify if the user is logged in to access the particular page.
+        Redirects to login page otherwise.
+    """
     @wraps(f)
     def wrap(*args, **kwargs):
         if 'logged_in' in session:
@@ -32,8 +36,13 @@ def is_logged_in(f):
             return redirect(url_for('login'))
     return wrap
 
-#Function to check whether user has Administrative privileges. Will redirect other users to Home page
 def is_admin(f):
+    """
+    is_admin(f):
+        Decorator to verify if the user is logged in and has admin privileges.
+        Redirects to login page if not logged in.
+        Redirects to home page if not an admin.
+    """
     @wraps(f)
     def wrap(*args, **kwargs):
         if 'logged_in' in session and 'admin' in session:
@@ -46,15 +55,23 @@ def is_admin(f):
             return redirect(url_for('index'))
     return wrap
 
-#Flask Route for Home Page
 @app.route('/')
 def index():
+    """
+    index(): Renders the home page.
+    @route: '/'
+    @privilege reqd: None
+    """
     return render_template('home.html')
 
-#Flask Route to view all users in Admin mode
 @app.route('/users')
 @is_admin
 def users():
+    """
+    users(): Renders the page with all registered users' details.
+    @route: '/users'
+    @privilege reqd: admin
+    """
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM users")
     users = cur.fetchall()
@@ -64,18 +81,25 @@ def users():
     flash("No users found.", "danger")
     return render_template('home.html')
 
-#Flask form to Update Booking Status
 class UpdateBooking(Form):
+    """
+    UpdateBooking(Form): Form used by the admin to update the booking request.
+    """
     typeList = [('Awaited', 'Awaited'), ('Accepted', 'Accepted'),('Rejected', 'Rejected')]
     status = SelectField('Status', choices=typeList)
     bookingID = HiddenField('ID')
 
-#Flask Route to update slot booking requests
 @app.route('/update_booking/<int:BookingID>', methods=['GET', 'POST'])
 @is_admin
 def update_booking(BookingID):
+    """
+    update_booking(BookingID): Renders the update booking requests page.
+    @route: '/update_booking/<int:BookingID>'
+    @privilege reqd: admin
+    """
     form = UpdateBooking(request.form)
     if request.method == 'POST':
+        # POST Request : Perform action
         cur = mysql.connection.cursor()
         Status = request.form['status']
         BookingID = request.form['bookingID']
@@ -84,20 +108,28 @@ def update_booking(BookingID):
         cur.close()
         flash("Status Updated.", "success")
         return redirect(url_for('requests'))
+    # GET Request : Load the form
     return render_template('update_booking.html', BookingID=BookingID, form=form)
 
-#Flask form to Reschedule Booking
 class RescheduleBooking(Form):
+    """
+    RescheduleBooking(Form): Form used by the admin to reschedule a booking request.
+    """
     From = DateTimeLocalField("From: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
     To = DateTimeLocalField("To: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
     bookingID = HiddenField('ID')
 
-#Flask Route to Reschedule Booking
 @app.route('/reschedule/<int:BookingID>', methods=['GET', 'POST'])
 @is_admin
 def reschedule(BookingID):
+    """
+    reschedule(BookingID): Renders the reschedule booking requests page.
+    @route: '/reschedule/<int:BookingID>'
+    @privilege reqd: admin
+    """
     form = RescheduleBooking(request.form)
     if request.method == 'POST':
+        # POST Request : Perform action
         cur = mysql.connection.cursor()
         Status = 'Rescheduled'
         BookingID = request.form['bookingID']
@@ -108,20 +140,29 @@ def reschedule(BookingID):
         cur.close()
         flash("Booking Rescheduled.", "success")
         return redirect(url_for('requests'))
+    # GET Request : Load the form
     return render_template('reschedule.html', BookingID=BookingID, form=form)
 
 
-#Flask form to Accept/Reject Rescheduled Booking
 class AccRejRescheduling(Form):
+    """
+    AccRejReschedule(Form): Form for the user to accept/reject the rescheduled booking.
+    """
     typeList = [('Accepted','Accept'), ('Rejected', 'Reject')]
     status = SelectField('Status', choices=typeList)
     bookingID = HiddenField('ID')
 
-#Flask Route to Accept/Reject Rescheduled Booking
 @app.route('/confirm_reschedule/<int:BookingID>', methods=['GET', 'POST'])
+@is_logged_in
 def confirm_resched(BookingID):
+    """
+    confirm_resched(BookingID): Renders the page for the user to Accept/Reject Rescheduled Booking.
+    @route: '/confirm_reschedule/<int:BookingID>'
+    @privilege reqd: log in
+    """
     form = AccRejRescheduling(request.form)
     if request.method == 'POST':
+        # POST Request : Perform action
         cur = mysql.connection.cursor()
         Status = request.form['status']
         cur.execute("UPDATE Bookings SET RequestStatus= %s WHERE BookingID = %s",(Status, BookingID))
@@ -129,12 +170,17 @@ def confirm_resched(BookingID):
         cur.close()
         flash("Accepted/Rejected Rescheduling.", "success")
         return redirect(url_for('profile'))
+    # GET Request : Load the form
     return render_template('confirm_rescheduling.html', BookingID=BookingID, form=form)
 
-#Flask Route to view slot booking requests
 @app.route('/requests', methods=['GET', 'POST'])
 @is_admin
 def requests():
+    """
+    requests(): Renders the awaiting requests page.
+    @route: '/requests'
+    @privilege reqd: admin
+    """
     cur = mysql.connection.cursor()
     result = cur.execute(
         "SELECT e.Name as equipmentName,\
@@ -151,10 +197,14 @@ def requests():
     flash("No Pending Requests.", "danger")
     return render_template('requests.html', form=form)
 
-#Flask Route to view particular user ID and their history in Admin mode
 @app.route('/user/<int:UserId>')
 @is_admin
 def user(UserId):
+    """
+    user(UserID): Renders a particular user's history.
+    @route: '/user/<int:UserId>'
+    @privilege reqd: admin
+    """
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT username, name, accountType FROM users WHERE UserId = %s", [UserId])
     cur_user = cur.fetchone()
@@ -168,8 +218,10 @@ def user(UserId):
     cur.close()
     return render_template('user.html', history = history, user=cur_user)
 
-#Form to register for the C4DFED slot booking facility
 class RegisterForm(Form):
+    """
+    RegisterForm(Form): Form for a new user to register.
+    """
     typeList = [('Institute', 'Institute'), ('Academic', 'Academic'), ('Other','Other')]
     name = StringField('Name', [validators.Length(min=1, max=50), validators.DataRequired()])
     username = StringField('E-mail ID', [validators.Length(min=1, max=50), validators.DataRequired()])
@@ -177,9 +229,13 @@ class RegisterForm(Form):
     confirm = PasswordField('Confirm Password', [validators.DataRequired()])
     accountType = SelectField('Account Type', choices=typeList)
 
-#Flask Route to register a new user
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    register(): Renders the registration form for new users.
+    @route: '/register'
+    @privilege reqd: None
+    """
     form = RegisterForm(request.form)
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -187,7 +243,7 @@ def register():
         password = cryptcontext.hash(str(form.password.data))
         accountType = form.accountType.data
         
-        #Create Cursor
+        # Create Cursor
         cur = mysql.connection.cursor()
         result = cur.execute("SELECT * FROM users WHERE username = %s", [username])
         
@@ -195,22 +251,27 @@ def register():
             cur.execute("INSERT INTO users(name, username, password, accountType) Values(%s, %s, %s, %s)", (name, username, password, accountType))
             mysql.connection.commit()
             flash("Registered Successfully", "success")
-        #Raise error if email already used
+        # Raise error if email already used
         else:
             error = 'An account already exists with this email address.'
             return render_template('register.html', error= error, form=form)
 
-        #Close Connection
+        # Close Connection
         cur.close()
 
         return redirect(url_for('index'))
 
     return render_template('register.html', form=form)
 
-#Flask Route to login to C4DFED slot booking facility
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    login(): Render the login form page.
+    @route: '/login'
+    @privilege reqd: None
+    """
     if request.method == 'POST':
+        # POST Request : Perform action
         username = request.form['username']
         password_candidate = request.form['password']
 
@@ -220,7 +281,7 @@ def login():
             data = cur.fetchone()
             password = data['password']
 
-            #Verify encrypted password
+            # Verify encrypted password
             if cryptcontext.verify(password_candidate, password):
                 session['logged_in'] = True
                 session['username'] = username
@@ -229,38 +290,54 @@ def login():
                 flash("You are now logged in", 'success')
                 return redirect(url_for('dashboard'))
             else:
+                # Wrong password
                 error = 'Invalid Login'
                 return render_template('login.html', error= error)
         else:
+            # No user found
             error = 'Invalid Login'
             return render_template('login.html', error= error)
         cur.close()
+    # GET Request : Load the form
     return render_template('login.html')
 
-#Flask route to logout of current session. Redirects to login page
 @app.route('/logout')
 def logout():
+    """
+    logout(): Redirects to the login page after logging out of the current session.
+    @route: '/logout'
+    @privilege reqd: None
+    """
     session.clear()
     flash("You are now logged out", "success")
     return redirect(url_for('login'))
 
-#Flask route to view user dashboard with all available equipment for booking
 @app.route('/dashboard')
 @is_logged_in
 def dashboard():
+    """
+    dashboard(): Renders a page with a list of facilities/ eqipments available in the C4DFED lab.
+    @route: '/dashboard'
+    @privilege reqd: log in
+    """
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM Equipments")
     users = cur.fetchall()
     cur.close()
     if result > 0:
         return render_template('dashboard.html', Equipments = users)
+    # No equipments in the database
     flash("No Equipments available.", "danger")
     return render_template('home.html')
 
-#flask route to view user profile with user history
 @app.route('/profile')
 @is_logged_in
 def profile():
+    """
+    profile(): Renders personal information of a user, his request status, bill summary, etc.
+    @route: '/profile'
+    @privilege reqd: log in
+    """
     username=session['username']
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT UserId, username, name, accountType FROM users WHERE username = %s", [username])
@@ -276,19 +353,26 @@ def profile():
     cur.close()
     return render_template('profile.html', history = history, user=cur_user)
 
-#Form to record booking details of equipment with timings and supervisor details
 class BookingForm(Form):
+    """
+    BookingForm(Form): Form used by the user to send a booking request.
+    """
     SupervisorName = StringField('Supervisor Name', [validators.Length(min=1, max=255), validators.DataRequired()])
     SupervisorEmail = StringField('Supervisor Email', [validators.Length(min=1), validators.DataRequired()])
     From = DateTimeLocalField("From: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
     To = DateTimeLocalField("To: ", [validators.DataRequired()], format='%Y-%m-%dT%H:%M')
 
-#Flask route to book slot of a particular equipment
 @app.route('/book_slot/<int:EquipID>', methods=['GET', 'POST'])
 @is_logged_in
 def book_slot(EquipID):
+    """
+    book_slot(): To send a booking request to the admin for a particlular equipment.
+    @route: '/book_slot'
+    @privilege reqd: log in
+    """
     form = BookingForm(request.form)
     if request.method == 'POST':
+        # POST Request : Perform action
         cur = mysql.connection.cursor()
         From = form.From.data
         To = form.To.data
@@ -298,8 +382,6 @@ def book_slot(EquipID):
         SupervisorName = form.SupervisorName.data
         SupervisorEMail = form.SupervisorEmail.data
 
-        # TODO : Sanitize that the slot isn't already booked or awaited
-
         cur.execute(
             "INSERT INTO Bookings(SName, SEmail, fromDateTime, toDateTime, UserId, EquipID) Values(%s, %s, %s, %s, %s, %s)", 
         (SupervisorName, SupervisorEMail, From, To, userID, EquipID))
@@ -307,7 +389,7 @@ def book_slot(EquipID):
         cur.close()
         flash("Booking Request Sent.", "success")
         return redirect(url_for('dashboard'))
-        
+    # GET Request : Load the form after fetching the required data
     cur = mysql.connection.cursor()
     username = session['username']
     result = cur.execute("SELECT accountType from users WHERE username = %s", [username])
@@ -355,13 +437,15 @@ def return_data():
     eventList = []
     
     if 'admin' in session:
+        # Admin can see the calendar along with the who booked it
         for e in calendarEvents:
             eventList.append({
                 "title": e['EqName'] + ": " + e['username'],
                 "start": e['FromDateTime'],
                 "end": e['ToDateTime']
         })
-    elif 'logged_in' in session:    
+    elif 'logged_in' in session:
+        # Users can only see the calendar and not the user who booked it
         for e in calendarEvents:
             eventList.append({
                 "title": e['EqName'],
@@ -370,10 +454,11 @@ def return_data():
             })
 
     cur.close()
+    # Convert Python List to JSON String
     jsonStr = json.dumps(eventList)
     return jsonStr
 
-#Server runs on 127.0.0.1:5000
+# Server runs on 127.0.0.1:5000
 if __name__ == '__main__':
     app.secret_key = "8Wy@d3E&wTin"
-    app.run(debug=True)
+    app.run(debug=True) # debug = False for production

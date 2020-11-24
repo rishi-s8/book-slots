@@ -5,7 +5,9 @@
 {% block body %}
 <div class="jumbotron text-center">
   <h1>Welcome to C4DFED @ IIT Mandi</h1>
+  {% if not session.logged_in %}
   <p class="lead">Register and Login to know more about the facilities.</p>
+  {% endif %}
 </div>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
