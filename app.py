@@ -331,7 +331,7 @@ def book_slot(EquipID):
     return render_template('book_slot.html', EquipName = EquipName,EquipID = EquipID, form=form, Cost=Cost)
 
 @app.route('/calendar')
-@is_admin
+@is_logged_in
 def calendar():
     """
     Render fullcalendar.
@@ -340,7 +340,7 @@ def calendar():
     return render_template("json.html")
 
 @app.route('/data')
-@is_admin
+@is_logged_in
 def return_data():
     """
     Return json of calendar events.
@@ -354,12 +354,21 @@ def return_data():
     calendarEvents = cur.fetchall()
     eventList = []
     
-    for e in calendarEvents:
-        eventList.append({
-            "title": e['EqName'] + ": " + e['username'],
-            "start": e['FromDateTime'],
-            "end": e['ToDateTime']
+    if 'admin' in session:
+        for e in calendarEvents:
+            eventList.append({
+                "title": e['EqName'] + ": " + e['username'],
+                "start": e['FromDateTime'],
+                "end": e['ToDateTime']
         })
+    elif 'logged_in' in session:    
+        for e in calendarEvents:
+            eventList.append({
+                "title": e['EqName'],
+                "start": e['FromDateTime'],
+                "end": e['ToDateTime']
+            })
+
     cur.close()
     jsonStr = json.dumps(eventList)
     return jsonStr
