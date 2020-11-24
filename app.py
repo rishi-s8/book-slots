@@ -161,17 +161,29 @@ def confirm_resched(BookingID):
     @privilege reqd: log in
     """
     form = AccRejRescheduling(request.form)
-    if request.method == 'POST':
-        # POST Request : Perform action
-        cur = mysql.connection.cursor()
-        Status = request.form['status']
-        cur.execute("UPDATE Bookings SET RequestStatus= %s WHERE BookingID = %s",(Status, BookingID))
-        mysql.connection.commit()
-        cur.close()
-        flash("Accepted/Rejected Rescheduling.", "success")
-        return redirect(url_for('profile'))
-    # GET Request : Load the form
-    return render_template('confirm_rescheduling.html', BookingID=BookingID, form=form)
+    cur = mysql.connection.cursor()
+    # Check if the booking belongs to logged in user
+
+    result = cur.execute("SELECT u.username AS username, b.RequestStatus as RequestStatus \
+            FROM Bookings b NATURAL JOIN users u WHERE BookingID = %s",[BookingID])
+    if result == 1:
+            booking = cur.fetchone()
+            if booking['username'] == session['username'] and booking['RequestStatus'] == 'Rescheduled':
+                # The username matches and the status is Rescheduled
+                if request.method == 'POST':
+                    # POST Request : Perform action
+                    Status = request.form['status']
+                    cur.execute("UPDATE Bookings SET RequestStatus= %s WHERE BookingID = %s",(Status, BookingID))
+                    mysql.connection.commit()
+                    cur.close()
+                    flash("Accepted/Rejected Rescheduling.", "success")
+                    return redirect(url_for('profile'))
+                # GET Request : Load the form
+                cur.close()
+                return render_template('confirm_rescheduling.html', BookingID=BookingID, form=form)
+    cur.close()
+    flash("Unauthorized Rescheduling.", "danger")
+    return redirect(url_for('profile'))
 
 @app.route('/requests', methods=['GET', 'POST'])
 @is_admin
@@ -432,7 +444,7 @@ def return_data():
         "SELECT u.username AS username, e.Name AS EqName, DATE_FORMAT(b.fromDateTime, '%Y-%m-%dT%H:%i')\
             AS FromDateTime, DATE_FORMAT(b.toDateTime, '%Y-%m-%dT%H:%i') AS ToDateTime \
                 FROM (Bookings b INNER JOIN Equipments e ON b.EquipID = e.id) INNER JOIN users u \
-                    ON b.UserId = u.UserId WHERE b.RequestStatus = 'Accepted';")
+                    ON b.UserId = u.UserId WHERE b.RequestStatus = 'Accepted'")
     calendarEvents = cur.fetchall()
     eventList = []
     
