@@ -15,6 +15,7 @@
       <th>SUPERVISOR NAME</th>
       <th>SUPERVISOR EMAIL</th>
       <th>REQUEST STATUS</th>
+      <th>PAYMENT STATUS</th> 
     </tr>
     {% for req in requests %}
     <tr>
@@ -25,6 +26,11 @@
       <td>{{req.SName}}</td>
       <td>{{req.SEmail}}</td>
       <td><a href="/update_booking/{{req.BookingID}}"><input type = 'submit' class = "btn btn-primary" value = "Update"></a></td>
+      {% if req.Payment == 1 %}
+      <td><a href="/update_payment/{{req.BookingID}}"><input type = 'submit' class = "btn btn-primary" value = "Paid"></a></td>
+      {% else %}
+      <td><a href="/update_payment/{{req.BookingID}}"><input type = 'submit'  class = "btn btn-primary" value = "Unpaid"></a></td>
+      {% endif %}
     </tr>
     {% endfor %}
   </table>

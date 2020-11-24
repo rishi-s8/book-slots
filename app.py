@@ -81,6 +81,21 @@ def users():
     flash("No users found.", "danger")
     return render_template('home.html')
 
+@app.route('/update_payment/<int:BookingID>', methods=['GET', 'POST'])
+@is_admin
+def update_payment(BookingID):
+    """
+    update_payment(BookingID): changes the payment status for the booking.
+    @route: '/update_payment/<int:BookingID>'
+    @privilege reqd: admin
+    """
+    cur = mysql.connection.cursor()
+    cur.execute("UPDATE Bookings SET Payment= %s WHERE BookingID = %s", (1, BookingID))
+    mysql.connection.commit()
+    cur.close()
+    flash("Status Updated.", "success")
+    return redirect(url_for('requests'))
+
 class UpdateBooking(Form):
     """
     UpdateBooking(Form): Form used by the admin to update the booking request.
@@ -186,7 +201,7 @@ def requests():
         "SELECT e.Name as equipmentName,\
             u.name as userName,\
             b.UserId, b.fromDateTime, b.toDateTime,\
-            b.SName, b.SEmail, b.BookingID from Bookings b\
+            b.SName, b.SEmail, b.BookingID, b.Payment from Bookings b\
             INNER JOIN users u on u.UserId = b.UserId\
             INNER JOIN Equipments e\
             ON e.id = b.EquipID WHERE b.RequestStatus='Awaited'")
