@@ -81,6 +81,21 @@ def users():
     flash("No users found.", "danger")
     return render_template('home.html')
 
+@app.route('/update_payment/<int:UserId>/<int:BookingID>', methods=['GET', 'POST'])
+@is_admin
+def update_payment(UserId, BookingID):
+    """
+    update_payment(BookingID): changes the payment status for the booking.
+    @route: '/update_payment/<int:BookingID>'
+    @privilege reqd: admin
+    """
+    cur = mysql.connection.cursor()
+    cur.execute("UPDATE Bookings SET Payment= %s WHERE BookingID = %s", (1, BookingID))
+    mysql.connection.commit()
+    cur.close()
+    flash("Status Updated.", "success")
+    return redirect('/user/' + str(UserId))
+
 class UpdateBooking(Form):
     """
     UpdateBooking(Form): Form used by the admin to update the booking request.
@@ -209,6 +224,13 @@ def requests():
     flash("No Pending Requests.", "danger")
     return render_template('requests.html', form=form)
 
+def computeOutstandingAmount(bookings):
+    amount = 0.0
+    for i in bookings:
+        if i['RequestStatus'] == 'Accepted' and i['Payment'] == 0:
+            amount += float(i['cost'])
+    return amount
+
 @app.route('/user/<int:UserId>')
 @is_admin
 def user(UserId):
@@ -218,17 +240,18 @@ def user(UserId):
     @privilege reqd: admin
     """
     cur = mysql.connection.cursor()
-    result = cur.execute("SELECT username, name, accountType FROM users WHERE UserId = %s", [UserId])
+    result = cur.execute("SELECT username, name, accountType, UserId FROM users WHERE UserId = %s", [UserId])
     cur_user = cur.fetchone()
+    costColumns = {'Institute': 'CostInstitute' , 'Other': 'CostOther','Academic': 'CostAcademic', 'admin': 'CostInstitute'}
     result = cur.execute(
         "SELECT e.Name as equipmentName,\
             b.fromDateTime, b.toDateTime, b.RequestStatus,\
-            b.SName, b.SEmail from Bookings b\
+            b.SName, b.SEmail, b.Payment, b.BookingID, e." + costColumns[cur_user['accountType']] + " AS cost from Bookings b\
             INNER JOIN Equipments e\
             ON e.id = b.EquipID WHERE b.UserId = %s", [UserId])
     history = cur.fetchall()
     cur.close()
-    return render_template('user.html', history = history, user=cur_user)
+    return render_template('user.html', history = history, user=cur_user, amount = computeOutstandingAmount(history))
 
 class RegisterForm(Form):
     """
@@ -354,16 +377,17 @@ def profile():
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT UserId, username, name, accountType FROM users WHERE username = %s", [username])
     cur_user = cur.fetchone()
+    costColumns = {'Institute': 'CostInstitute' , 'Other': 'CostOther','Academic': 'CostAcademic', 'admin': 'CostInstitute'}
     UserId = cur_user['UserId']
     result = cur.execute(
         "SELECT e.Name as equipmentName,\
             b.fromDateTime, b.toDateTime, b.RequestStatus,\
-            b.SName, b.SEmail, b.BookingID from Bookings b\
+            b.SName, b.SEmail, b.BookingID, b.Payment, e." + costColumns[cur_user['accountType']] + " AS cost from Bookings b\
             INNER JOIN Equipments e\
             ON e.id = b.EquipID WHERE b.UserId = %s", [UserId])
     history = cur.fetchall()
     cur.close()
-    return render_template('profile.html', history = history, user=cur_user)
+    return render_template('profile.html', history = history, user=cur_user, amount = computeOutstandingAmount(history))
 
 class BookingForm(Form):
     """

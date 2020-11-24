@@ -7,6 +7,7 @@
 <p> Name : {{user.name}} </p> 
 <p> Email : {{user.username}} </p>
 <p> Account Type : {{user.accountType}} </p>
+<p> Outstanding Amount(Rs.) : {{amount}} </p>
   <hr>
   <table class = 'table table-striped'>
     <tr>
@@ -16,6 +17,7 @@
       <th>SUPERVISOR NAME</th>
       <th>SUPERVISOR EMAIL</th>
       <th>REQUEST STATUS</th>
+      <th>PAYMENT STATUS</th>
     </tr>
     {% for booking in history %}
     <tr>
@@ -30,6 +32,11 @@
           <a href="/confirm_reschedule/{{booking.BookingID}}"><input type='submit' class="btn btn-primary" value="Accept/Reject"></a>
         {% endif %}
       </td>
+      {% if booking.Payment == 1 %}
+      <td>Paid</td>
+      {% else %}
+      <td>Unpaid</td>
+      {% endif %}
     </tr>
     {% endfor %}
   </table>

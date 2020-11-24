@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.22, for Linux (x86_64)
 --
--- Host: localhost    Database: c4dfedBooking1
+-- Host: localhost    Database: c4dfedBooking
 -- ------------------------------------------------------
 -- Server version	8.0.22
 
@@ -31,6 +31,7 @@ CREATE TABLE `Bookings` (
   `SName` varchar(120) NOT NULL,
   `SEmail` varchar(500) NOT NULL,
   `BookingID` int unsigned NOT NULL AUTO_INCREMENT,
+  `Payment` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`BookingID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -41,7 +42,7 @@ CREATE TABLE `Bookings` (
 
 LOCK TABLES `Bookings` WRITE;
 /*!40000 ALTER TABLE `Bookings` DISABLE KEYS */;
-INSERT INTO `Bookings` VALUES (1,7,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','superviser','email',1),(7,1,'2020-11-13 22:00:00','2020-11-13 23:03:00','Awaited','Rishi','b17138@students.iitmandi.ac.in',2),(1,1,'2020-11-09 10:36:00','2020-11-09 15:30:00','Awaited','newUser','newUser@email.com',3);
+INSERT INTO `Bookings` VALUES (1,7,'2012-06-18 10:34:09','2012-06-18 10:34:12','Awaited','superviser','email',1,1),(7,1,'2020-11-13 22:00:00','2020-11-13 23:03:00','Awaited','Rishi','b17138@students.iitmandi.ac.in',2,0),(1,1,'2020-11-09 10:36:00','2020-11-09 15:30:00','Awaited','newUser','newUser@email.com',3,0);
 /*!40000 ALTER TABLE `Bookings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -112,4 +113,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-11-16 15:40:55
+-- Dump completed on 2020-11-24 17:09:55
