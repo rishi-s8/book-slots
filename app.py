@@ -1,5 +1,5 @@
 from itertools import chain
-from flask import Flask, render_template, flash, redirect, url_for, session, request, logging
+from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, json
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField, HiddenField
 from wtforms.fields.html5 import DateTimeLocalField
@@ -329,6 +329,40 @@ def book_slot(EquipID):
         cur.close()
     
     return render_template('book_slot.html', EquipName = EquipName,EquipID = EquipID, form=form, Cost=Cost)
+
+@app.route('/calendar')
+@is_admin
+def calendar():
+    """
+    Render fullcalendar.
+    Courtesy https://github.com/kkarimi/flask-fullcalendar 
+    """
+    return render_template("json.html")
+
+@app.route('/data')
+@is_admin
+def return_data():
+    """
+    Return json of calendar events.
+    """
+    cur = mysql.connection.cursor()
+    result = cur.execute(
+        "SELECT u.username AS username, e.Name AS EqName, DATE_FORMAT(b.fromDateTime, '%Y-%m-%dT%H:%i')\
+            AS FromDateTime, DATE_FORMAT(b.toDateTime, '%Y-%m-%dT%H:%i') AS ToDateTime \
+                FROM (Bookings b INNER JOIN Equipments e ON b.EquipID = e.id) INNER JOIN users u \
+                    ON b.UserId = u.UserId WHERE b.RequestStatus = 'Accepted';")
+    calendarEvents = cur.fetchall()
+    eventList = []
+    
+    for e in calendarEvents:
+        eventList.append({
+            "title": e['EqName'] + ": " + e['username'],
+            "start": e['FromDateTime'],
+            "end": e['ToDateTime']
+        })
+    cur.close()
+    jsonStr = json.dumps(eventList)
+    return jsonStr
 
 #Server runs on 127.0.0.1:5000
 if __name__ == '__main__':
