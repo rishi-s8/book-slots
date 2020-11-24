@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from functools import wraps
 from wtforms import form
 
-cryptcontext = CryptContext(schemes=["sha256_crypt", "md5_crypt", "des_crypt"])
+cryptcontext = CryptContext(schemes=["sha256_crypt", "md5_crypt", "des_crypt"]) # Schemes for encrypting passwords
 
 app = Flask(__name__)
 
@@ -99,6 +99,7 @@ def update_booking(BookingID):
     """
     form = UpdateBooking(request.form)
     if request.method == 'POST':
+        # POST Request : Perform action
         cur = mysql.connection.cursor()
         Status = request.form['status']
         BookingID = request.form['bookingID']
@@ -107,6 +108,7 @@ def update_booking(BookingID):
         cur.close()
         flash("Status Updated.", "success")
         return redirect(url_for('requests'))
+    # GET Request : Load the form
     return render_template('update_booking.html', BookingID=BookingID, form=form)
 
 class RescheduleBooking(Form):
@@ -127,6 +129,7 @@ def reschedule(BookingID):
     """
     form = RescheduleBooking(request.form)
     if request.method == 'POST':
+        # POST Request : Perform action
         cur = mysql.connection.cursor()
         Status = 'Rescheduled'
         BookingID = request.form['bookingID']
@@ -137,6 +140,7 @@ def reschedule(BookingID):
         cur.close()
         flash("Booking Rescheduled.", "success")
         return redirect(url_for('requests'))
+    # GET Request : Load the form
     return render_template('reschedule.html', BookingID=BookingID, form=form)
 
 
@@ -158,6 +162,7 @@ def confirm_resched(BookingID):
     """
     form = AccRejRescheduling(request.form)
     if request.method == 'POST':
+        # POST Request : Perform action
         cur = mysql.connection.cursor()
         Status = request.form['status']
         cur.execute("UPDATE Bookings SET RequestStatus= %s WHERE BookingID = %s",(Status, BookingID))
@@ -165,6 +170,7 @@ def confirm_resched(BookingID):
         cur.close()
         flash("Accepted/Rejected Rescheduling.", "success")
         return redirect(url_for('profile'))
+    # GET Request : Load the form
     return render_template('confirm_rescheduling.html', BookingID=BookingID, form=form)
 
 @app.route('/requests', methods=['GET', 'POST'])
@@ -265,6 +271,7 @@ def login():
     @privilege reqd: None
     """
     if request.method == 'POST':
+        # POST Request : Perform action
         username = request.form['username']
         password_candidate = request.form['password']
 
@@ -283,12 +290,15 @@ def login():
                 flash("You are now logged in", 'success')
                 return redirect(url_for('dashboard'))
             else:
+                # Wrong password
                 error = 'Invalid Login'
                 return render_template('login.html', error= error)
         else:
+            # No user found
             error = 'Invalid Login'
             return render_template('login.html', error= error)
         cur.close()
+    # GET Request : Load the form
     return render_template('login.html')
 
 @app.route('/logout')
@@ -316,6 +326,7 @@ def dashboard():
     cur.close()
     if result > 0:
         return render_template('dashboard.html', Equipments = users)
+    # No equipments in the database
     flash("No Equipments available.", "danger")
     return render_template('home.html')
 
@@ -361,6 +372,7 @@ def book_slot(EquipID):
     """
     form = BookingForm(request.form)
     if request.method == 'POST':
+        # POST Request : Perform action
         cur = mysql.connection.cursor()
         From = form.From.data
         To = form.To.data
@@ -377,7 +389,7 @@ def book_slot(EquipID):
         cur.close()
         flash("Booking Request Sent.", "success")
         return redirect(url_for('dashboard'))
-        
+    # GET Request : Load the form after fetching the required data
     cur = mysql.connection.cursor()
     username = session['username']
     result = cur.execute("SELECT accountType from users WHERE username = %s", [username])
@@ -425,13 +437,15 @@ def return_data():
     eventList = []
     
     if 'admin' in session:
+        # Admin can see the calendar along with the who booked it
         for e in calendarEvents:
             eventList.append({
                 "title": e['EqName'] + ": " + e['username'],
                 "start": e['FromDateTime'],
                 "end": e['ToDateTime']
         })
-    elif 'logged_in' in session:    
+    elif 'logged_in' in session:
+        # Users can only see the calendar and not the user who booked it
         for e in calendarEvents:
             eventList.append({
                 "title": e['EqName'],
@@ -440,10 +454,11 @@ def return_data():
             })
 
     cur.close()
+    # Convert Python List to JSON String
     jsonStr = json.dumps(eventList)
     return jsonStr
 
 # Server runs on 127.0.0.1:5000
 if __name__ == '__main__':
     app.secret_key = "8Wy@d3E&wTin"
-    app.run(debug=True)
+    app.run(debug=True) # debug = False for production
