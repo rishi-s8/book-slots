@@ -1,6 +1,7 @@
 from itertools import chain
 from flask import Flask, render_template, flash, redirect, url_for, session, request, logging, json
 from flask_mysqldb import MySQL
+from flask_mail import Mail, Message
 from wtforms import Form, StringField, TextAreaField, PasswordField, validators, SelectField, HiddenField
 from wtforms.fields.html5 import DateTimeLocalField
 from passlib.context import CryptContext
@@ -22,6 +23,18 @@ app.config['MYSQL_CURSORCLASS'] = config.MYSQL_CURSORCLASS
 
 # init MySQL
 mysql = MySQL(app)
+
+# init Mail
+# Ensure 2 Factor Authentication is off and allow less secure app access
+mail = Mail(app)
+
+app.config['MAIL_SERVER'] = config.MAIL_SERVER
+app.config['MAIL_PORT'] = config.MAIL_PORT
+app.config['MAIL_USERNAME'] = config.MAIL_USERNAME
+app.config['MAIL_PASSWORD'] = config.MAIL_PASSWORD
+app.config['MAIL_USE_TLS'] = config.MAIL_USE_TLS
+app.config['MAIL_USE_SSL'] = config.MAIL_USE_SSL
+mail = Mail(app)
 
 def is_logged_in(f):
     """
@@ -122,7 +135,29 @@ def update_booking(BookingID):
         BookingID = request.form['bookingID']
         cur.execute("UPDATE Bookings SET RequestStatus= %s WHERE BookingID = %s", (Status, BookingID))
         mysql.connection.commit()
+        result = cur.execute(
+            "SELECT e.Name as equipmentName,\
+            u.name, u.username,\
+            b.UserId, b.fromDateTime, b.toDateTime,\
+            b.SName, b.SEmail from Bookings b\
+            INNER JOIN users u on u.UserId = b.UserId\
+            INNER JOIN Equipments e\
+            ON e.id = b.EquipID WHERE b.BookingID=%s",[BookingID])
+        Data = cur.fetchone()
+        name = Data['name']
+        From = Data['fromDateTime']
+        To = Data['toDateTime']
+        EquipName = Data['equipmentName']
+        SupervisorName = Data['SName']
+        SupervisorEmail = Data['SEmail']
+        UserEmail = Data['username']
         cur.close()
+        msg = Message('C4DFED Slot Update',sender=app.config['MAIL_USERNAME'], recipients=[UserEmail])
+        msg.body = "Hi {}\nYour booking for the following equipment at C4DFED -\nEquipment: {}\nFrom: {}\nTo: {}\n has been {} by the Admin of C4DFED and your Supervisor: {}.\nContact them for further details".format(name, EquipName, From, To,Status, SupervisorName)
+        mail.send(msg)
+        msg = Message('C4DFED Slot Update', sender=app.config['MAIL_USERNAME'],recipients=[SupervisorEmail])
+        msg.body = "Hi {}\nYour Student: {}'s booking for the following equipment at C4DFED -\nEquipment: {}\nFrom: {}\nTo: {}\n has been {}.\nContact us for further details.".format(SupervisorName,name, EquipName, From, To, Status)
+        mail.send(msg)
         flash("Status Updated.", "success")
         return redirect(url_for('requests'))
     # GET Request : Load the form
@@ -154,7 +189,29 @@ def reschedule(BookingID):
         To = request.form['To']
         cur.execute("UPDATE Bookings SET RequestStatus= %s, fromDateTime=%s, toDateTime=%s WHERE BookingID = %s",(Status, From, To, BookingID))
         mysql.connection.commit()
+        result = cur.execute(
+            "SELECT e.Name as equipmentName,\
+            u.name, u.username,\
+            b.UserId, b.fromDateTime, b.toDateTime,\
+            b.SName, b.SEmail from Bookings b\
+            INNER JOIN users u on u.UserId = b.UserId\
+            INNER JOIN Equipments e\
+            ON e.id = b.EquipID WHERE b.BookingID=%s", [BookingID])
+        Data = cur.fetchone()
+        name = Data['name']
+        From = Data['fromDateTime']
+        To = Data['toDateTime']
+        EquipName = Data['equipmentName']
+        SupervisorName = Data['SName']
+        SupervisorEmail = Data['SEmail']
+        UserEmail = Data['username']
         cur.close()
+        msg = Message('C4DFED Slot Rescheduled',sender=app.config['MAIL_USERNAME'], recipients=[UserEmail])
+        msg.body = "Hi {}\nYour booking for the following equipment at C4DFED -\nEquipment: {}\n has been rescheduled. Below are the new timings.\nFrom: {}\nTo: {}\nKindly visit your profile to accept/reject the proposed timings.".format(name, EquipName, From, To)
+        mail.send(msg)
+        msg = Message('C4DFED Slot Rescheduled',sender=app.config['MAIL_USERNAME'], recipients=[SupervisorEmail])
+        msg.body = "Hi {}\nYour Student: {}'s booking for the following equipment at C4DFED -\nEquipment: {}\nhas been rescheduled. Below are the new timings.\nFrom: {}\nTo: {}\nContact us for further details.".format(SupervisorName, name, EquipName, From, To)
+        mail.send(msg)
         flash("Booking Rescheduled.", "success")
         return redirect(url_for('requests'))
     # GET Request : Load the form
@@ -192,7 +249,29 @@ def confirm_resched(BookingID):
                     Status = request.form['status']
                     cur.execute("UPDATE Bookings SET RequestStatus= %s WHERE BookingID = %s",(Status, BookingID))
                     mysql.connection.commit()
+                    result = cur.execute(
+                                    "SELECT e.Name as equipmentName,\
+                                    u.name, u.username,\
+                                    b.UserId, b.fromDateTime, b.toDateTime,\
+                                    b.SName, b.SEmail from Bookings b\
+                                    INNER JOIN users u on u.UserId = b.UserId\
+                                    INNER JOIN Equipments e\
+                                    ON e.id = b.EquipID WHERE b.BookingID=%s", [BookingID])
+                    Data = cur.fetchone()
+                    name = Data['name']
+                    From = Data['fromDateTime']
+                    To = Data['toDateTime']
+                    EquipName = Data['equipmentName']
+                    SupervisorName = Data['SName']
+                    SupervisorEmail = Data['SEmail']
+                    UserEmail = Data['username']
                     cur.close()
+                    msg = Message('C4DFED Slot Update',sender=app.config['MAIL_USERNAME'], recipients=[UserEmail])
+                    msg.body = "Hi {}\nYour booking for the following equipment at C4DFED -\nEquipment: {}\nFrom: {}\nTo: {}\n has been {} by the Admin of C4DFED and your Supervisor: {}.\nContact them for further details".format(name, EquipName, From, To,Status, SupervisorName)
+                    mail.send(msg)
+                    msg = Message('C4DFED Slot Update', sender=app.config['MAIL_USERNAME'],recipients=[SupervisorEmail])
+                    msg.body = "Hi {}\nYour Student: {}'s booking for the following equipment at C4DFED -\nEquipment: {}\nFrom: {}\nTo: {}\n has been {}.\nContact us for further details.".format(SupervisorName,name, EquipName, From, To, Status)
+                    mail.send(msg)
                     flash("Accepted/Rejected Rescheduling.", "success")
                     return redirect(url_for('profile'))
                 # GET Request : Load the form
@@ -288,6 +367,9 @@ def register():
             cur.execute("INSERT INTO users(name, username, password, accountType) Values(%s, %s, %s, %s)", (name, username, password, accountType))
             mysql.connection.commit()
             flash("Registered Successfully", "success")
+            msg = Message('C4DFED Account', sender=app.config['MAIL_USERNAME'],recipients=[username])
+            msg.body = "Hi {}\nWelcome to C4DFED Equipment Slot Booking Facility.\nYou have successfully created an {} account. You can now book a slot for your research purposes.\nEnjoy your visit!".format(name,accountType)
+            mail.send(msg)
         # Raise error if email already used
         else:
             error = 'An account already exists with this email address.'
@@ -415,17 +497,28 @@ def book_slot(EquipID):
         From = form.From.data
         To = form.To.data
         username = session['username']
-        result = cur.execute("SELECT UserId from users WHERE username = %s", [username])
-        userID = cur.fetchone()['UserId']
+        result = cur.execute("SELECT UserId, name from users WHERE username = %s", [username])
+        curr_User = cur.fetchone()
+        userID = curr_User['UserId']
+        name = curr_User['name']
         SupervisorName = form.SupervisorName.data
         SupervisorEMail = form.SupervisorEmail.data
 
         cur.execute(
             "INSERT INTO Bookings(SName, SEmail, fromDateTime, toDateTime, UserId, EquipID) Values(%s, %s, %s, %s, %s, %s)", 
         (SupervisorName, SupervisorEMail, From, To, userID, EquipID))
+        result = cur.execute("SELECT Name FROM Equipments where id = %s", [EquipID])
+        cur_Equi = cur.fetchone()
+        EquipName = cur_Equi['Name']
         mysql.connection.commit()
         cur.close()
         flash("Booking Request Sent.", "success")
+        msg = Message('C4DFED Slot Booking',sender=app.config['MAIL_USERNAME'], recipients=[username])
+        msg.body = "Hi {}\nYour booking for the following equipment at C4DFED -\nEquipment: {}\nFrom: {}To: {}\n has been recorded and is under purview by the Admin of C4DFED and your Supervisor: {}.\nYou will be notified of the booking status.".format(name, EquipName, From, To, SupervisorName)
+        mail.send(msg)
+        msg = Message('C4DFED Slot Booking', sender=app.config['MAIL_USERNAME'],recipients=[SupervisorEMail])
+        msg.body = "Hi {}\nYour student has sent a booking request for the following equipment at C4DFED.\nName: {}\nEquipment: {}\nFrom: {}\nTo: {}\nKindly review the booking.".format(SupervisorName,name,EquipName,From,To)
+        mail.send(msg)
         return redirect(url_for('dashboard'))
     # GET Request : Load the form after fetching the required data
     cur = mysql.connection.cursor()
