@@ -20,6 +20,7 @@ app.config['MYSQL_USER'] = config.MYSQL_USER
 app.config['MYSQL_PASSWORD'] = config.MYSQL_PASSWORD
 app.config['MYSQL_DB'] = config.MYSQL_DB
 app.config['MYSQL_CURSORCLASS'] = config.MYSQL_CURSORCLASS
+app.secret_key = os.urandom(12).hex()
 
 # init MySQL
 mysql = MySQL(app)
@@ -591,5 +592,4 @@ def return_data():
 
 # Server runs on 127.0.0.1:5000
 if __name__ == '__main__':
-    app.secret_key = os.urandom(12).hex()
     app.run(debug=True) # debug = False for production
